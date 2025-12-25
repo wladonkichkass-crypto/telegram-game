@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест игры</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        button { padding: 10px 20px; margin: 10px; }
+        iframe { width: 100%; height: 500px; border: 2px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>Тестируем игру для Telegram</h1>
+    <button onclick="document.getElementById('gameFrame').src = 'index.html'">
+        Загрузить игру
+    </button>
+    
+    <iframe id="gameFrame" src="index.html"></iframe>
+    
+    <h2>Инструкция:</h2>
+    <p>1. Дважды щелкните на index.html - игра откроется в браузере</p>
+    <p>2. Управление: стрелки ← → и ПРОБЕЛ для стрельбы</p>
+    <p>3. Или кнопки под игрой</p>
+</body>
+</html>
