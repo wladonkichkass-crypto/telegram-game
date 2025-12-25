@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>МИЦЕЛИЙ-68: Гриботех-рогалик</title>
+    <title>Мицелий-68 • Лаборатория</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=PT+Mono&family=Philosopher&display=swap');
-        
         :root {
-            --day-bg: #e8e0c8;
-            --night-bg: #1a1a2a;
-            --text-day: #3a2c1a;
-            --text-night: #d0d0a0;
-            --panel-day: #d8d0b8;
-            --panel-night: #2a2a3a;
-            --accent: #8a4a1a;
-            --danger: #c44;
-            --success: #4a8a4a;
+            --bg: #0c0c1a;
+            --panel: #1a1a2e;
+            --accent: #00ff88;
+            --danger: #ff3366;
+            --warning: #ffaa00;
+            --text: #e0e0ff;
+            --border: #2a2a4a;
         }
         
         * {
@@ -26,1234 +23,925 @@
         }
         
         body {
-            font-family: 'PT Mono', monospace;
-            background: var(--day-bg);
-            color: var(--text-day);
-            max-width: 800px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 10px;
+            max-width: 500px;
             margin: 0 auto;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0, 255, 136, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(255, 51, 102, 0.05) 0%, transparent 20%);
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        /* === HEADER === */
+        .header {
+            background: var(--panel);
+            border-radius: 15px;
             padding: 15px;
-            transition: all 0.5s ease;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><path d="M20,50 Q40,20 60,50 T100,50" stroke="%238a6a4a" fill="none"/></svg>');
-            min-height: 100vh;
+            border: 2px solid var(--border);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .level-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .level {
+            font-size: 14px;
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .level-badge {
+            background: linear-gradient(45deg, var(--accent), #00cc6a);
+            color: black;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .progress-container {
+            background: rgba(255, 255, 255, 0.1);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
             position: relative;
         }
         
-        body.night-mode {
-            background: var(--night-bg);
-            color: var(--text-night);
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.05"><circle cx="20" cy="20" r="3" fill="%2380a0ff"/><circle cx="50" cy="30" r="2" fill="%2380a0ff"/><circle cx="80" cy="20" r="4" fill="%2380a0ff"/></svg>');
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: var(--panel-day);
-            border: 2px solid var(--accent);
-            margin-bottom: 20px;
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #00cc6a);
+            width: 0%;
+            transition: width 0.5s ease;
             position: relative;
             overflow: hidden;
         }
         
-        .night-mode .header {
-            background: var(--panel-night);
-        }
-        
-        .header::before {
+        .progress-bar::after {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff6b6b);
-            background-size: 600% 100%;
-            animation: filmStrip 8s linear infinite;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                transparent 100%);
+            animation: shimmer 2s infinite;
         }
         
-        @keyframes filmStrip {
-            0% { background-position: 0% 0; }
-            100% { background-position: 600% 0; }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
         
-        .game-title {
-            font-family: 'Philosopher', sans-serif;
-            font-size: 24px;
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
-        }
-        
-        .game-title::before {
-            content: '🎬 ';
-        }
-        
-        .cycle-display {
-            text-align: center;
-            padding: 8px 15px;
-            border-radius: 20px;
+        .progress-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
-            background: linear-gradient(45deg, #ff9a00, #ff6b00);
+            font-size: 12px;
             color: white;
-            animation: pulse 2s infinite;
+            text-shadow: 1px 1px 2px black;
         }
         
-        .night-mode .cycle-display {
-            background: linear-gradient(45deg, #2c3e50, #34495e);
-            animation: pulseNight 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-        
-        @keyframes pulseNight {
-            0%, 100% { box-shadow: 0 0 5px #3498db; }
-            50% { box-shadow: 0 0 15px #3498db; }
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .stat {
-            background: var(--panel-day);
-            padding: 10px;
-            text-align: center;
-            border-left: 4px solid var(--accent);
-        }
-        
-        .night-mode .stat {
-            background: var(--panel-night);
-            border-left-color: #3498db;
-        }
-        
-        .stat-value {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-        
+        /* === MAIN CONTENT === */
         .main-content {
             display: grid;
-            grid-template-columns: 3fr 1fr;
-            gap: 20px;
+            grid-template-columns: 1fr;
+            gap: 15px;
         }
         
-        .location-card {
-            background: var(--panel-day);
+        .card {
+            background: var(--panel);
+            border-radius: 15px;
             padding: 20px;
-            border: 2px solid var(--accent);
-            min-height: 300px;
-            position: relative;
+            border: 2px solid var(--border);
         }
         
-        .night-mode .location-card {
-            background: var(--panel-night);
-            border-color: #444;
-        }
-        
-        .location-title {
-            color: var(--accent);
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed currentColor;
-        }
-        
-        .location-description {
-            line-height: 1.6;
+        .card-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
-            min-height: 120px;
+            color: var(--accent);
+            font-size: 18px;
         }
         
+        .card-title i {
+            font-size: 24px;
+        }
+        
+        .counter {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--accent);
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        
+        /* === ГЕРОИ (УЧЁНЫЕ) === */
+        .heroes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .hero-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .hero-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.2);
+        }
+        
+        .hero-card.empty {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px dashed var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 40px;
+        }
+        
+        .hero-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .hero-name {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: var(--accent);
+        }
+        
+        .hero-stats {
+            font-size: 12px;
+            opacity: 0.8;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .hero-stat {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        /* === ЛАБОРАТОРИИ (КОМНАТЫ) === */
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .room-card {
+            background: linear-gradient(135deg, rgba(42, 42, 74, 0.8), rgba(26, 26, 46, 0.8));
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .room-card.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+        
+        .room-card.locked {
+            filter: grayscale(0.8);
+            opacity: 0.6;
+        }
+        
+        .room-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+        
+        .room-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .room-desc {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        
+        .room-progress {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .room-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        /* === ЗАДАНИЯ === */
+        .quest {
+            background: rgba(255, 170, 0, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .quest-icon {
+            font-size: 30px;
+            color: var(--warning);
+        }
+        
+        .quest-text {
+            flex-grow: 1;
+        }
+        
+        .quest-reward {
+            background: var(--warning);
+            color: black;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        /* === КНОПКИ ДЕЙСТВИЙ === */
         .action-buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-top: 20px;
         }
         
         .btn {
-            padding: 12px 15px;
+            padding: 15px;
             border: none;
-            background: var(--accent);
-            color: white;
-            font-family: 'PT Mono', monospace;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .btn-danger {
-            background: var(--danger);
-        }
-        
-        .btn-success {
-            background: var(--success);
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-        }
-        
-        .inventory-sidebar {
-            background: var(--panel-day);
-            padding: 20px;
-            border: 2px solid var(--accent);
-        }
-        
-        .night-mode .inventory-sidebar {
-            background: var(--panel-night);
-        }
-        
-        .inventory-title {
-            margin-bottom: 15px;
-            color: var(--accent);
-        }
-        
-        .inventory-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            min-height: 100px;
-            margin-bottom: 20px;
-        }
-        
-        .item {
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.3);
-            border: 1px solid var(--accent);
-            font-size: 14px;
-            position: relative;
-        }
-        
-        .night-mode .item {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .item-count {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--danger);
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
         }
         
-        .event-log {
-            background: rgba(0,0,0,0.05);
-            padding: 15px;
-            margin-top: 20px;
-            border-top: 2px solid var(--accent);
-            max-height: 200px;
-            overflow-y: auto;
+        .btn-primary {
+            background: linear-gradient(45deg, var(--accent), #00cc6a);
+            color: black;
         }
         
-        .night-mode .event-log {
-            background: rgba(255,255,255,0.05);
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.3);
         }
         
-        .log-entry {
-            margin-bottom: 8px;
-            padding-left: 15px;
-            border-left: 3px solid var(--accent);
-            animation: fadeIn 0.5s;
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border: 2px solid var(--border);
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--accent);
         }
         
-        .progress-container {
-            margin-top: 20px;
+        .btn-danger {
+            background: linear-gradient(45deg, var(--danger), #ff0044);
+            color: white;
+            grid-column: span 2;
+            margin-top: 10px;
         }
         
-        .progress-bar {
+        /* === БОЕВАЯ СИСТЕМА === */
+        .battle-section {
+            background: rgba(255, 51, 102, 0.1);
+            border: 2px solid var(--danger);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        
+        .battle-title {
+            color: var(--danger);
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .enemy-display {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .enemy-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .enemy-health {
             height: 20px;
-            background: #ddd;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 5px;
+            margin: 15px 0;
         }
         
-        .night-mode .progress-bar {
-            background: #333;
-        }
-        
-        .progress-fill {
+        .enemy-health-fill {
             height: 100%;
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
-            transition: width 0.5s;
+            background: linear-gradient(90deg, var(--danger), #ff0044);
+            width: 100%;
+            transition: width 0.3s;
         }
         
-        .craft-modal {
+        .xp-reward {
+            color: var(--accent);
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        /* === FOOTER === */
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            opacity: 0.6;
+        }
+        
+        /* === МОДАЛЬНЫЕ ОКНА === */
+        .modal {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.8);
             z-index: 1000;
             justify-content: center;
             align-items: center;
         }
         
-        .craft-modal.active {
+        .modal.active {
             display: flex;
         }
         
-        .craft-content {
-            background: var(--panel-day);
+        .modal-content {
+            background: var(--panel);
+            border-radius: 15px;
             padding: 30px;
-            max-width: 600px;
+            max-width: 400px;
             width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
+            border: 2px solid var(--accent);
         }
         
-        .night-mode .craft-content {
-            background: var(--panel-night);
+        .modal-title {
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
         }
         
-        .recipe {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            gap: 10px;
-            align-items: center;
-            padding: 10px;
-            border: 1px solid var(--accent);
-            margin-bottom: 10px;
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 24px;
             cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .recipe:hover {
-            background: rgba(138, 74, 26, 0.1);
-        }
-        
-        .recipe-ingredients, .recipe-result {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .diag-negative {
-            color: var(--danger);
-            font-weight: bold;
-        }
-        
-        .diag-positive {
-            color: var(--success);
-            font-weight: bold;
-        }
-        
-        .flicker {
-            animation: flicker 0.3s infinite alternate;
-        }
-        
-        @keyframes flicker {
-            from { opacity: 0.7; }
-            to { opacity: 1; }
-        }
-        
-        .warning {
-            color: #ff9900;
-            animation: warningPulse 1s infinite;
-        }
-        
-        @keyframes warningPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .terminal-text {
-            font-family: 'PT Mono', monospace;
-            background: black;
-            color: #00ff00;
-            padding: 10px;
-            border: 1px solid #00ff00;
-            margin: 10px 0;
-        }
-        
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Диафильм-полоска сверху -->
-    <div class="film-strip"></div>
-    
-    <!-- Основной заголовок -->
-    <div class="header">
-        <div class="game-title">МИЦЕЛИЙ-68</div>
-        <div class="cycle-display" id="cycleDisplay">ЦИКЛ: ДЕНЬ</div>
-    </div>
-    
-    <!-- Статистика игрока -->
-    <div class="stats">
-        <div class="stat">
-            <div>ЗДОРОВЬЕ</div>
-            <div class="stat-value" id="health">10/10</div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="healthBar" style="width: 100%"></div>
+    <div class="container">
+        <!-- ШАПКА С УРОВНЕМ -->
+        <div class="header">
+            <div class="level-info">
+                <div class="level">Уровень института</div>
+                <div class="level-badge">11</div>
             </div>
-        </div>
-        <div class="stat">
-            <div>ЭНЕРГИЯ</div>
-            <div class="stat-value" id="energy">100/100</div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="energyBar" style="width: 100%"></div>
+            <div class="progress-container">
+                <div class="progress-bar" id="levelProgress" style="width: 92%"></div>
+                <div class="progress-text">154,965/168,000 опыта</div>
             </div>
-        </div>
-        <div class="stat">
-            <div>УРОВЕНЬ</div>
-            <div class="stat-value" id="level">1</div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="xpBar" style="width: 0%"></div>
-            </div>
-        </div>
-        <div class="stat">
-            <div>ДЕНЬ</div>
-            <div class="stat-value" id="day">1</div>
-            <div>Выжил: <span id="roomsCleared">0</span> комнат</div>
-        </div>
-    </div>
-    
-    <!-- Основной контент -->
-    <div class="main-content">
-        <!-- Левая колонка: Локация и действия -->
-        <div class="location-card">
-            <h2 class="location-title" id="locationTitle">ЛАБОРАТОРИЯ 54-Б</h2>
-            <div class="location-description" id="locationDesc">
-                <p>Заброшенная лаборатория НИИ "Прогресс-68". В воздухе витает запах озона и старой плесени. Стены покрыты странными грибными культурами, которые пульсируют мягким светом. На верстаке разбросаны инструменты и компоненты.</p>
-                <p id="enemyInfo"></p>
-            </div>
-            
-            <div class="action-buttons" id="actionButtons">
-                <!-- Кнопки будут генерироваться динамически -->
-            </div>
-            
-            <div class="event-log" id="eventLog">
-                <div class="log-entry">📻 <strong>Запись в журнале:</strong> 23 октября 1986. Эксперимент с мико-носителем вышел из-под контроля. Нужно эвакуироваться, но выходы заблокированы. Попробую собрать что-то из хлама...</div>
-                <div class="log-entry">🔧 <strong>Справка:</strong> Используй верстак для создания оружия. Ночь опаснее дня!</div>
+            <div style="text-align: center; font-size: 12px; margin-top: 10px;">
+                Собирайте опыт из аномалий для повышения уровня
             </div>
         </div>
         
-        <!-- Правая колонка: Инвентарь и крафт -->
-        <div class="inventory-sidebar">
-            <h3 class="inventory-title">🎒 ИНВЕНТАРЬ</h3>
-            <div class="inventory-items" id="inventory">
-                <div class="item">Отвёртка <span class="item-count">2</span></div>
-                <div class="item">Аккумулятор</div>
-                <div class="item">Споры</div>
+        <!-- ГЛАВНЫЙ КОНТЕНТ -->
+        <div class="main-content">
+            <!-- УЧЁНЫЕ (ГЕРОИ) -->
+            <div class="card">
+                <div class="card-title">
+                    <div><i class="fas fa-user-alt"></i> Учёные-микологи</div>
+                    <div class="counter">4/12</div>
+                </div>
+                <div class="heroes-grid" id="heroesGrid">
+                    <!-- Герои будут загружены через JS -->
+                </div>
+                <button class="btn btn-secondary" onclick="showRecruitModal()">
+                    <i class="fas fa-user-plus"></i> Нанять учёного
+                </button>
             </div>
             
-            <h3 class="inventory-title">⚙️ КРАФТ</h3>
-            <button class="btn" onclick="openCraft()">Открыть верстак</button>
-            <button class="btn btn-secondary" onclick="rest()">Отдохнуть (-1 день)</button>
+            <!-- ЛАБОРАТОРИИ (КОМНАТЫ) -->
+            <div class="card">
+                <div class="card-title">
+                    <div><i class="fas fa-flask"></i> Лаборатории</div>
+                    <div class="counter">2/10</div>
+                </div>
+                <div class="rooms-grid">
+                    <div class="room-card active">
+                        <div class="room-icon"><i class="fas fa-dna"></i></div>
+                        <div class="room-name">Био-лаборатория</div>
+                        <div class="room-desc">Производит споры</div>
+                        <div class="room-progress">
+                            <div class="room-progress-fill" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="room-card active">
+                        <div class="room-icon"><i class="fas fa-bolt"></i></div>
+                        <div class="room-name">Энерго-блок</div>
+                        <div class="room-desc">Генерирует энергию</div>
+                        <div class="room-progress">
+                            <div class="room-progress-fill" style="width: 30%"></div>
+                        </div>
+                    </div>
+                    <div class="room-card locked">
+                        <div class="room-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="room-name">Оружейная</div>
+                        <div class="room-desc">Заблокировано</div>
+                        <div style="font-size: 11px; color: var(--danger); margin-top: 5px;">
+                            Нужен 5 уровень
+                        </div>
+                    </div>
+                    <div class="room-card locked">
+                        <div class="room-icon"><i class="fas fa-hospital"></i></div>
+                        <div class="room-name">Инфирмария</div>
+                        <div class="room-desc">Заблокировано</div>
+                        <div style="font-size: 11px; color: var(--danger); margin-top: 5px;">
+                            Нужен 8 уровень
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="showBuildModal()" style="margin-top: 15px;">
+                    <i class="fas fa-hammer"></i> Построить лабораторию
+                </button>
+            </div>
             
-            <div class="progress-container">
-                <div>До конца дня:</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="dayProgress" style="width: 60%"></div>
+            <!-- ЗАДАНИЯ -->
+            <div class="card">
+                <div class="card-title">
+                    <div><i class="fas fa-tasks"></i> Задания института</div>
+                </div>
+                
+                <div class="quest">
+                    <div class="quest-icon"><i class="fas fa-fist-raised"></i></div>
+                    <div class="quest-text">Создайте 2 воинов 2-го уровня</div>
+                    <div class="quest-reward">+5000 опыта</div>
+                </div>
+                
+                <div class="quest">
+                    <div class="quest-icon"><i class="fas fa-users"></i></div>
+                    <div class="quest-text">Пригласите 3 друзей в игру</div>
+                    <div class="quest-reward">Разблокировка комнат</div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="inviteFriend()">
+                        <i class="fas fa-user-friends"></i> Пригласить друга
+                    </button>
+                    <button class="btn btn-primary" onclick="startBattle()">
+                        <i class="fas fa-fighter-jet"></i> В БОЙ!
+                    </button>
                 </div>
             </div>
             
-            <div style="margin-top: 20px; padding: 10px; background: rgba(0,0,0,0.1);">
-                <strong>ЭФФЕКТЫ:</strong>
-                <div id="effects">Нет</div>
+            <!-- БОЕВАЯ СИСТЕМА -->
+            <div class="battle-section">
+                <div class="battle-title">ЕЖЕДНЕВНАЯ АНОМАЛИЯ</div>
+                
+                <div class="enemy-display">
+                    <div class="enemy-icon">🍄👾</div>
+                    <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">
+                        МИКО-ГОЛЕМ
+                    </div>
+                    <div style="font-size: 14px; opacity: 0.8; margin-bottom: 15px;">
+                        Мутировавший грибной колосс. Очень опасен!
+                    </div>
+                    
+                    <div class="enemy-health">
+                        <div class="enemy-health-fill" id="enemyHealth" style="width: 100%"></div>
+                    </div>
+                    
+                    <div class="xp-reward">Награда: 15,000 опыта</div>
+                </div>
+                
+                <button class="btn btn-danger" onclick="attackEnemy()">
+                    <i class="fas fa-bolt"></i> АТАКОВАТЬ АНОМАЛИЮ
+                </button>
+            </div>
+        </div>
+        
+        <!-- ФУТЕР -->
+        <div class="footer">
+            <div style="margin-bottom: 10px;">
+                <button class="btn btn-secondary" style="padding: 10px 20px; font-size: 14px;">
+                    <i class="fas fa-home"></i> База
+                </button>
+            </div>
+            МИЦЕЛИЙ-68 © 1986 НИИ "Прогресс-68"
+        </div>
+    </div>
+    
+    <!-- МОДАЛЬНОЕ ОКНО НАЙМА -->
+    <div class="modal" id="recruitModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('recruitModal')">×</button>
+            <div class="modal-title">НАЙМ УЧЁНОГО</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="hero-card" onclick="recruitScientist('biol')">
+                    <div class="hero-icon">🧬</div>
+                    <div class="hero-name">БИОЛОГ</div>
+                    <div class="hero-stats">
+                        <div class="hero-stat">+5/сек</div>
+                    </div>
+                    <div style="font-size: 12px; margin-top: 10px; color: var(--accent);">
+                        1,000 споров
+                    </div>
+                </div>
+                
+                <div class="hero-card" onclick="recruitScientist('engineer')">
+                    <div class="hero-icon">⚡</div>
+                    <div class="hero-name">ИНЖЕНЕР</div>
+                    <div class="hero-stats">
+                        <div class="hero-stat">+10/сек</div>
+                    </div>
+                    <div style="font-size: 12px; margin-top: 10px; color: var(--accent);">
+                        2,500 споров
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; font-size: 14px; opacity: 0.8;">
+                Учёные автоматически производят ресурсы
             </div>
         </div>
     </div>
     
-    <!-- Модальное окно крафта -->
-    <div class="craft-modal" id="craftModal">
-        <div class="craft-content">
-            <h2>ВЕРСТАК ГРИБОТЕХНИКА</h2>
-            <p>Комбинируйте компоненты для создания оружия и инструментов.</p>
+    <!-- МОДАЛЬНОЕ ОКНО СТРОИТЕЛЬСТВА -->
+    <div class="modal" id="buildModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('buildModal')">×</button>
+            <div class="modal-title">СТРОИТЕЛЬСТВО</div>
             
-            <div id="recipes">
-                <!-- Рецепты будут загружены динамически -->
+            <div style="margin-bottom: 20px;">
+                <div style="background: rgba(0,255,136,0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 30px;">🔬</div>
+                        <div>
+                            <div style="font-weight: bold;">ИССЛЕДОВАТЕЛЬСКАЯ</div>
+                            <div style="font-size: 14px; opacity: 0.8;">+20% к опыту от аномалий</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 14px;">
+                        <div>Требуется: 5,000 споров • Уровень 3</div>
+                        <button class="btn btn-primary" style="margin-top: 10px; padding: 10px;">Построить</button>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(255,170,0,0.1); padding: 15px; border-radius: 10px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="font-size: 30px;">🛡️</div>
+                        <div>
+                            <div style="font-weight: bold;">ОБОРОНИТЕЛЬНАЯ</div>
+                            <div style="font-size: 14px; opacity: 0.8;">-30% урона от аномалий</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 14px;">
+                        <div>Требуется: 8,000 споров • Уровень 5</div>
+                        <button class="btn btn-secondary" style="margin-top: 10px; padding: 10px;">Недоступно</button>
+                    </div>
+                </div>
             </div>
-            
-            <button class="btn btn-danger" onclick="closeCraft()" style="margin-top: 20px;">Закрыть верстак</button>
         </div>
     </div>
     
     <script>
-        // =========== ИГРОВОЕ СОСТОЯНИЕ ===========
-        const gameState = {
-            health: 10,
-            maxHealth: 10,
-            energy: 100,
-            maxEnergy: 100,
-            level: 1,
-            xp: 0,
-            xpToNext: 50,
-            day: 1,
-            cycle: 'day', // 'day' или 'night'
-            cycleProgress: 0.6, // 0-1
-            roomsCleared: 0,
-            location: 'lab',
-            currentEnemy: null,
-            effects: [],
-            inventory: {
-                'отвёртка': 2,
-                'аккумулятор': 1,
-                'споры': 1,
-                'ржавый транзистор': 1
-            },
-            weapons: [],
-            discoveredRecipes: ['spark_staff']
+        // =========== ИГРОВЫЕ ДАННЫЕ ===========
+        let gameData = {
+            level: 11,
+            xp: 154965,
+            xpNeeded: 168000,
+            spores: 4250, // Игровая валюта
+            scientists: 4,
+            maxScientists: 12,
+            rooms: 2,
+            maxRooms: 10,
+            enemyHealth: 100,
+            maxEnemyHealth: 100
         };
         
-        // =========== БАЗА ДАННЫХ ИГРЫ ===========
-        const recipes = {
-            spark_staff: {
-                name: 'Искрящий посох',
-                desc: 'Примитивное электрошоковое оружие',
-                ingredients: { 'отвёртка': 1, 'аккумулятор': 1, 'споры': 1 },
-                result: { type: 'weapon', name: 'Искрящий посох', damage: 3, effect: 'stun' }
-            },
-            fungal_grenade: {
-                name: 'Грибная граната',
-                desc: 'Разрывной заряд со спорами',
-                ingredients: { 'банка': 1, 'порох': 1, 'споры': 2 },
-                result: { type: 'consumable', name: 'Грибная граната', damage: 5, aoe: true }
-            },
-            myco_armor: {
-                name: 'Мико-броня',
-                desc: 'Лёгкая броня из хитина',
-                ingredients: { 'кожа': 2, 'хитин': 3, 'споры': 1 },
-                result: { type: 'armor', name: 'Мико-броня', defense: 2 }
-            },
-            bio_scanner: {
-                name: 'Био-сканер',
-                desc: 'Обнаруживает редкие грибы',
-                ingredients: { 'линза': 1, 'микросхема': 1, 'аккумулятор': 1 },
-                result: { type: 'tool', name: 'Био-сканер', effect: 'detect_rare' }
-            }
-        };
-        
-        const locations = {
-            lab: {
-                name: 'ЛАБОРАТОРИЯ 54-Б',
-                desc: 'Ваша база. Относительно безопасно, можно отдохнуть и скрафтить оружие.',
-                actions: ['craft', 'rest', 'explore_corridor']
-            },
-            corridor: {
-                name: 'ГЛАВНЫЙ КОРИДОР',
-                desc: 'Длинный коридор с обвалившейся штукатуркой. По стенам ползут синие мицелиальные узоры.',
-                actions: ['explore_room', 'return_lab', 'listen']
-            },
-            storage: {
-                name: 'СКЛАД КОМПОНЕНТОВ',
-                desc: 'Заваленное старым оборудованием помещение. Можно найти полезный хлам.',
-                actions: ['search', 'return_corridor', 'quick_exit']
-            },
-            greenhouse: {
-                name: 'ФИТОТРОННАЯ',
-                desc: 'Заброшенная оранжерея. Грибы здесь растут особенно буйно.',
-                actions: ['collect_fungi', 'return_corridor', 'hide']
-            }
-        };
-        
-        const enemies = {
-            yeast: {
-                name: 'ШАГАЮЩИЕ ДРОЖЖИ',
-                desc: 'Агрессивные колонии дрожжей, передвигающиеся амёбообразно.',
-                health: 8,
-                damage: 2,
-                xp: 10,
-                loot: ['споры', 'фермент'],
-                dayOnly: true
-            },
-            vine: {
-                name: 'ЛОВЧАЯ ЛИАНА',
-                desc: 'Быстрый хищный мицелий с щупальцами.',
-                health: 12,
-                damage: 4,
-                xp: 20,
-                loot: ['хитин', 'споры', 'ядро лианы'],
-                nightOnly: true
-            },
-            golem: {
-                name: 'МИКО-ГОЛЕМ',
-                desc: 'Скопление грибов, принявшее гуманоидную форму. Очень опасно!',
-                health: 25,
-                damage: 6,
-                xp: 50,
-                loot: ['ядро лианы', 'хитин', 'редкие споры', 'кристалл'],
-                boss: true
-            }
-        };
-        
-        // =========== ОСНОВНЫЕ ФУНКЦИИ ===========
-        function updateDisplay() {
-            // Обновляем статистику
-            document.getElementById('health').textContent = `${gameState.health}/${gameState.maxHealth}`;
-            document.getElementById('energy').textContent = `${gameState.energy}/${gameState.maxEnergy}`;
-            document.getElementById('level').textContent = gameState.level;
-            document.getElementById('day').textContent = gameState.day;
-            document.getElementById('roomsCleared').textContent = gameState.roomsCleared;
-            
-            // Прогресс-бары
-            document.getElementById('healthBar').style.width = `${(gameState.health / gameState.maxHealth) * 100}%`;
-            document.getElementById('energyBar').style.width = `${(gameState.energy / gameState.maxEnergy) * 100}%`;
-            document.getElementById('xpBar').style.width = `${(gameState.xp / gameState.xpToNext) * 100}%`;
-            document.getElementById('dayProgress').style.width = `${gameState.cycleProgress * 100}%`;
-            
-            // Цикл дня/ночи
-            const cycleText = gameState.cycle === 'day' ? 'ДЕНЬ' : 'НОЧЬ';
-            document.getElementById('cycleDisplay').textContent = `ЦИКЛ: ${cycleText}`;
-            
-            // Ночной режим
-            if (gameState.cycle === 'night') {
-                document.body.classList.add('night-mode');
-            } else {
-                document.body.classList.remove('night-mode');
-            }
-            
-            // Эффекты
-            const effectsEl = document.getElementById('effects');
-            if (gameState.effects.length > 0) {
-                effectsEl.innerHTML = gameState.effects.map(e => `• ${e}`).join('<br>');
-            } else {
-                effectsEl.textContent = 'Нет';
-            }
-            
-            // Инвентарь
-            updateInventoryDisplay();
-        }
-        
-        function updateInventoryDisplay() {
-            const inventoryEl = document.getElementById('inventory');
-            inventoryEl.innerHTML = '';
-            
-            for (const [item, count] of Object.entries(gameState.inventory)) {
-                const itemEl = document.createElement('div');
-                itemEl.className = 'item';
-                itemEl.textContent = item;
-                if (count > 1) {
-                    const countEl = document.createElement('span');
-                    countEl.className = 'item-count';
-                    countEl.textContent = count;
-                    itemEl.appendChild(countEl);
-                }
-                inventoryEl.appendChild(itemEl);
-            }
-        }
-        
-        function logEvent(text, type = 'info') {
-            const logEl = document.getElementById('eventLog');
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            
-            let icon = '📝';
-            if (type === 'combat') icon = '⚔️';
-            if (type === 'danger') icon = '⚠️';
-            if (type === 'loot') icon = '🎁';
-            if (type === 'craft') icon = '⚙️';
-            if (type === 'level') icon = '⭐';
-            
-            entry.innerHTML = `${icon} <strong>${type.toUpperCase()}:</strong> ${text}`;
-            
-            logEl.appendChild(entry);
-            logEl.scrollTop = logEl.scrollHeight;
-            
-            // Ограничиваем количество записей
-            while (logEl.children.length > 8) {
-                logEl.removeChild(logEl.firstChild);
-            }
-        }
-        
-        function changeLocation(locId) {
-            gameState.location = locId;
-            const loc = locations[locId];
-            
-            document.getElementById('locationTitle').textContent = loc.name;
-            document.getElementById('locationDesc').innerHTML = `<p>${loc.desc}</p>`;
-            
-            // Очищаем информацию о враге
-            document.getElementById('enemyInfo').innerHTML = '';
-            
-            // Случайный враг в некоторых локациях
-            if (Math.random() > 0.6 && locId !== 'lab') {
-                spawnEnemy();
-            }
-            
-            updateActions();
-            updateDisplay();
-        }
-        
-        function spawnEnemy() {
-            let availableEnemies = [];
-            
-            if (gameState.cycle === 'day') {
-                availableEnemies = Object.values(enemies).filter(e => e.dayOnly && !e.boss);
-            } else {
-                availableEnemies = Object.values(enemies).filter(e => !e.dayOnly || e.nightOnly);
-            }
-            
-            // 10% шанс на босса ночью
-            if (gameState.cycle === 'night' && Math.random() > 0.9) {
-                availableEnemies = Object.values(enemies).filter(e => e.boss);
-            }
-            
-            if (availableEnemies.length > 0) {
-                const enemy = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
-                gameState.currentEnemy = { ...enemy, currentHealth: enemy.health };
-                
-                const enemyInfo = document.getElementById('enemyInfo');
-                enemyInfo.innerHTML = `
-                    <div class="terminal-text">
-                        <div class="warning">⚠️ ОБНАРУЖЕНА УГРОЗА!</div>
-                        <strong>${enemy.name}</strong><br>
-                        ${enemy.desc}<br>
-                        Здоровье: ${enemy.currentHealth}/${enemy.health}
-                    </div>
-                `;
-                
-                logEvent(`Появился ${enemy.name}!`, 'danger');
-                updateActions();
-            }
-        }
-        
-        function updateActions() {
-            const buttonsEl = document.getElementById('actionButtons');
-            buttonsEl.innerHTML = '';
-            
-            const loc = locations[gameState.location];
-            
-            loc.actions.forEach(action => {
-                const btn = document.createElement('button');
-                btn.className = 'btn';
-                
-                switch(action) {
-                    case 'craft':
-                        btn.textContent = '⚙️ Открыть верстак';
-                        btn.onclick = openCraft;
-                        break;
-                    case 'rest':
-                        btn.textContent = '💤 Отдохнуть (-10 энергии, +5 здоровья)';
-                        btn.onclick = rest;
-                        btn.disabled = gameState.energy < 10;
-                        break;
-                    case 'explore_corridor':
-                        btn.textContent = gameState.cycle === 'night' ? '🌌 Выйти в коридор (ОПАСНО!)' : '🚪 Выйти в коридор';
-                        btn.onclick = () => changeLocation('corridor');
-                        if (gameState.cycle === 'night') {
-                            btn.className += ' btn-danger';
-                        }
-                        break;
-                    case 'explore_room':
-                        btn.textContent = '🔍 Исследовать комнату';
-                        btn.onclick = exploreRoom;
-                        break;
-                    case 'return_lab':
-                        btn.textContent = '🔙 Вернуться в лабораторию';
-                        btn.onclick = () => changeLocation('lab');
-                        break;
-                    case 'search':
-                        btn.textContent = '🔎 Обыскать склад';
-                        btn.onclick = searchStorage;
-                        break;
-                    case 'return_corridor':
-                        btn.textContent = '🚶‍♂️ Вернуться в коридор';
-                        btn.onclick = () => changeLocation('corridor');
-                        break;
-                    case 'listen':
-                        btn.textContent = '👂 Прислушаться';
-                        btn.onclick = listen;
-                        break;
-                    case 'collect_fungi':
-                        btn.textContent = '🍄 Собрать грибы';
-                        btn.onclick = collectFungi;
-                        break;
-                    case 'quick_exit':
-                        btn.textContent = '🏃‍♂️ Быстро уйти';
-                        btn.onclick = () => changeLocation('corridor');
-                        btn.className += ' btn-danger';
-                        break;
-                    case 'hide':
-                        btn.textContent = '🕳️ Спрятаться';
-                        btn.onclick = hide;
-                        break;
-                }
-                
-                buttonsEl.appendChild(btn);
-            });
-            
-            // Кнопки боя, если есть враг
-            if (gameState.currentEnemy) {
-                const attackBtn = document.createElement('button');
-                attackBtn.className = 'btn btn-danger';
-                attackBtn.textContent = '⚔️ Атаковать врага';
-                attackBtn.onclick = attackEnemy;
-                buttonsEl.prepend(attackBtn);
-                
-                const fleeBtn = document.createElement('button');
-                fleeBtn.className = 'btn btn-secondary';
-                fleeBtn.textContent = '🏃‍♂️ Попытаться сбежать';
-                fleeBtn.onclick = flee;
-                buttonsEl.prepend(fleeBtn);
-            }
-        }
-        
-        // =========== ИГРОВЫЕ МЕХАНИКИ ===========
-        function attackEnemy() {
-            if (!gameState.currentEnemy) return;
-            
-            const enemy = gameState.currentEnemy;
-            
-            // Простой урон
-            const playerDamage = 2 + (gameState.level * 0.5);
-            enemy.currentHealth -= Math.floor(playerDamage);
-            
-            logEvent(`Вы нанесли ${Math.floor(playerDamage)} урона ${enemy.name}!`, 'combat');
-            
-            // Контратака
-            if (enemy.currentHealth > 0) {
-                gameState.health -= enemy.damage;
-                logEvent(`${enemy.name} контратаковал и нанёс ${enemy.damage} урона!`, 'combat');
-                
-                if (gameState.health <= 0) {
-                    gameOver();
-                    return;
-                }
-            } else {
-                // Победа!
-                logEvent(`Вы победили ${enemy.name}! Получено ${enemy.xp} опыта.`, 'combat');
-                
-                // Награда
-                gameState.xp += enemy.xp;
-                enemy.loot.forEach(item => {
-                    addToInventory(item, 1);
-                    logEvent(`Найдено: ${item}`, 'loot');
-                });
-                
-                gameState.roomsCleared++;
-                gameState.currentEnemy = null;
-                
-                // Проверка уровня
-                checkLevelUp();
-            }
-            
-            updateDisplay();
-            updateActions();
-        }
-        
-        function flee() {
-            if (!gameState.currentEnemy) return;
-            
-            const successChance = gameState.cycle === 'night' ? 0.4 : 0.7;
-            
-            if (Math.random() < successChance) {
-                logEvent('Вы успешно сбежали!', 'combat');
-                gameState.currentEnemy = null;
-            } else {
-                logEvent('Не удалось сбежать! Враг атакует.', 'danger');
-                gameState.health -= gameState.currentEnemy.damage;
-                
-                if (gameState.health <= 0) {
-                    gameOver();
-                    return;
-                }
-            }
-            
-            updateDisplay();
-            updateActions();
-        }
-        
-        function rest() {
-            if (gameState.energy >= 10) {
-                gameState.energy -= 10;
-                gameState.health = Math.min(gameState.maxHealth, gameState.health + 5);
-                gameState.day++;
-                
-                // Прогресс цикла
-                gameState.cycleProgress += 0.3;
-                if (gameState.cycleProgress >= 1) {
-                    gameState.cycleProgress = 0;
-                    gameState.cycle = gameState.cycle === 'day' ? 'night' : 'day';
-                    logEvent(`Наступил ${gameState.cycle === 'day' ? 'день' : 'вечер'}!`, 'info');
-                }
-                
-                logEvent('Вы отдохнули. Восстановлено 5 здоровья.', 'info');
-                updateDisplay();
-            }
-        }
-        
-        function exploreRoom() {
-            if (gameState.energy < 15) {
-                logEvent('Недостаточно энергии для исследования!', 'danger');
-                return;
-            }
-            
-            gameState.energy -= 15;
-            gameState.cycleProgress += 0.1;
-            
-            const outcomes = [
-                { type: 'nothing', text: 'Комната пуста. Только пыль да паутина.' },
-                { type: 'loot', text: 'Вы нашли старый ящик с инструментами!', items: ['отвёртка', 'гаечный ключ', 'паяльник'] },
-                { type: 'enemy', text: 'В комнате затаился враг!' },
-                { type: 'event', text: 'Вы нашли старый журнал исследований. +20 опыта.', xp: 20 },
-                { type: 'trap', text: 'Вы запустили старую ловушку! -3 здоровья.', damage: 3 }
-            ];
-            
-            const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
-            
-            if (outcome.type === 'loot') {
-                const item = outcome.items[Math.floor(Math.random() * outcome.items.length)];
-                addToInventory(item, 1);
-                logEvent(`${outcome.text} Получено: ${item}`, 'loot');
-            } else if (outcome.type === 'enemy') {
-                spawnEnemy();
-                logEvent(outcome.text, 'danger');
-            } else if (outcome.type === 'event') {
-                gameState.xp += outcome.xp;
-                logEvent(outcome.text, 'info');
-                checkLevelUp();
-            } else if (outcome.type === 'trap') {
-                gameState.health -= outcome.damage;
-                logEvent(outcome.text, 'danger');
-                
-                if (gameState.health <= 0) {
-                    gameOver();
-                    return;
-                }
-            } else {
-                logEvent(outcome.text, 'info');
-            }
-            
-            // Проверка смены цикла
-            if (gameState.cycleProgress >= 1) {
-                gameState.cycleProgress = 0;
-                gameState.cycle = gameState.cycle === 'day' ? 'night' : 'day';
-                logEvent(`Наступил ${gameState.cycle === 'day' ? 'день' : 'вечер'}!`, 'info');
-            }
-            
-            updateDisplay();
-        }
-        
-        function searchStorage() {
-            if (gameState.energy < 20) {
-                logEvent('Недостаточно энергии!', 'danger');
-                return;
-            }
-            
-            gameState.energy -= 20;
-            
-            const foundItems = [
-                { name: 'аккумулятор', chance: 0.7 },
-                { name: 'микросхема', chance: 0.4 },
-                { name: 'линза', chance: 0.3 },
-                { name: 'редкие споры', chance: 0.2 },
-                { name: 'кристалл', chance: 0.1 }
-            ];
-            
-            let found = false;
-            foundItems.forEach(item => {
-                if (Math.random() < item.chance) {
-                    addToInventory(item.name, 1);
-                    logEvent(`Найден: ${item.name}`, 'loot');
-                    found = true;
-                }
-            });
-            
-            if (!found) {
-                logEvent('Ничего ценного не найдено.', 'info');
-            }
-            
-            updateDisplay();
-        }
-        
-        function collectFungi() {
-            if (gameState.energy < 15) {
-                logEvent('Недостаточно энергии!', 'danger');
-                return;
-            }
-            
-            gameState.energy -= 15;
-            
-            const fungi = [
-                { name: 'споры', count: 2 },
-                { name: 'хитин', count: 1 },
-                { name: 'ядро лианы', count: gameState.cycle === 'night' ? 1 : 0 }
-            ];
-            
-            fungi.forEach(f => {
-                if (f.count > 0) {
-                    addToInventory(f.name, f.count);
-                    logEvent(`Собрано: ${f.name} x${f.count}`, 'loot');
-                }
-            });
-            
-            // 30% шанс встретить врага в оранжерее
-            if (Math.random() < 0.3) {
-                spawnEnemy();
-            }
-            
-            updateDisplay();
-        }
-        
-        function listen() {
-            gameState.energy -= 5;
-            
-            const sounds = [
-                'Тишина... слишком тихо.',
-                'Слышен далёкий скрежет металла.',
-                'Капает вода где-то в трубах.',
-                'Шёпот... или это просто ветер?',
-                'Гул работающего генератора.'
-            ];
-            
-            const sound = sounds[Math.floor(Math.random() * sounds.length)];
-            logEvent(`Вы прислушиваетесь: ${sound}`, 'info');
-            
-            updateDisplay();
-        }
-        
-        function hide() {
-            gameState.energy -= 10;
-            logEvent('Вы спрятались в тени. Враги временно не обнаружат вас.', 'info');
-            
-            // Добавляем эффект скрытности
-            gameState.effects.push('Скрытность (1 ход)');
-            
-            updateDisplay();
-        }
-        
-        // =========== СИСТЕМА КРАФТА ===========
-        function openCraft() {
-            const modal = document.getElementById('craftModal');
-            const recipesEl = document.getElementById('recipes');
-            
-            recipesEl.innerHTML = '';
-            
-            Object.entries(recipes).forEach(([id, recipe]) => {
-                const recipeEl = document.createElement('div');
-                recipeEl.className = 'recipe';
-                recipeEl.onclick = () => attemptCraft(id);
-                
-                // Ингредиенты слева
-                const ingredientsEl = document.createElement('div');
-                ingredientsEl.className = 'recipe-ingredients';
-                
-                Object.entries(recipe.ingredients).forEach(([ing, count]) => {
-                    const ingEl = document.createElement('span');
-                    ingEl.className = 'item';
-                    ingEl.textContent = `${ing} x${count}`;
-                    
-                    // Проверяем, хватает ли ингредиентов
-                    if (!gameState.inventory[ing] || gameState.inventory[ing] < count) {
-                        ingEl.style.opacity = '0.5';
-                        ingEl.style.textDecoration = 'line-through';
-                    }
-                    
-                    ingredientsEl.appendChild(ingEl);
-                });
-                
-                // Стрелка посередине
-                const arrow = document.createElement('div');
-                arrow.innerHTML = '➔';
-                arrow.style.fontSize = '20px';
-                arrow.style.textAlign = 'center';
-                
-                // Результат справа
-                const resultEl = document.createElement('div');
-                resultEl.className = 'recipe-result';
-                
-                const resultItem = document.createElement('span');
-                resultItem.className = 'item';
-                resultItem.textContent = recipe.name;
-                resultEl.appendChild(resultItem);
-                
-                recipeEl.appendChild(ingredientsEl);
-                recipeEl.appendChild(arrow);
-                recipeEl.appendChild(resultEl);
-                
-                // Только показываем известные рецепты
-                if (gameState.discoveredRecipes.includes(id)) {
-                    recipesEl.appendChild(recipeEl);
-                }
-            });
-            
-            modal.classList.add('active');
-        }
-        
-        function closeCraft() {
-            document.getElementById('craftModal').classList.remove('active');
-        }
-        
-        function attemptCraft(recipeId) {
-            const recipe = recipes[recipeId];
-            let canCraft = true;
-            
-            // Проверяем ингредиенты
-            for (const [ing, count] of Object.entries(recipe.ingredients)) {
-                if (!gameState.inventory[ing] || gameState.inventory[ing] < count) {
-                    canCraft = false;
-                    logEvent(`Не хватает ${ing} x${count}`, 'danger');
-                    break;
-                }
-            }
-            
-            if (canCraft) {
-                // Убираем ингредиенты
-                for (const [ing, count] of Object.entries(recipe.ingredients)) {
-                    gameState.inventory[ing] -= count;
-                    if (gameState.inventory[ing] <= 0) {
-                        delete gameState.inventory[ing];
-                    }
-                }
-                
-                // Добавляем результат
-                const result = recipe.result;
-                if (result.type === 'weapon') {
-                    gameState.weapons.push(result);
-                    logEvent(`Создано: ${result.name}! Урон: ${result.damage}`, 'craft');
-                } else {
-                    addToInventory(result.name, 1);
-                    logEvent(`Создано: ${result.name}!`, 'craft');
-                }
-                
-                // Открываем новые рецепты случайно
-                if (Math.random() > 0.7) {
-                    const hiddenRecipes = Object.keys(recipes).filter(r => !gameState.discoveredRecipes.includes(r));
-                    if (hiddenRecipes.length > 0) {
-                        const newRecipe = hiddenRecipes[Math.floor(Math.random() * hiddenRecipes.length)];
-                        gameState.discoveredRecipes.push(newRecipe);
-                        logEvent(`Вы открыли новый рецепт: ${recipes[newRecipe].name}!`, 'craft');
-                    }
-                }
-                
-                updateDisplay();
-            }
-        }
-        
-        // =========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===========
-        function addToInventory(item, count = 1) {
-            if (!gameState.inventory[item]) {
-                gameState.inventory[item] = 0;
-            }
-            gameState.inventory[item] += count;
-        }
-        
-        function checkLevelUp() {
-            if (gameState.xp >= gameState.xpToNext) {
-                gameState.level++;
-                gameState.xp -= gameState.xpToNext;
-                gameState.xpToNext = Math.floor(gameState.xpToNext * 1.5);
-                
-                gameState.maxHealth += 3;
-                gameState.health = gameState.maxHealth;
-                gameState.maxEnergy += 10;
-                gameState.energy = gameState.maxEnergy;
-                
-                logEvent(`🎉 Уровень повышен! Теперь вы уровень ${gameState.level}.`, 'level');
-                logEvent(`Макс. здоровье: +3, макс. энергия: +10`, 'level');
-            }
-        }
-        
-        function gameOver() {
-            logEvent('💀 ВЫ ПОГИБЛИ! Игра окончена.', 'danger');
-            
-            // Показываем итоги
-            setTimeout(() => {
-                alert(`ИГРА ОКОНЧЕНА\n\nУровень: ${gameState.level}\nДней выжито: ${gameState.day}\nКомнат очищено: ${gameState.roomsCleared}\n\nНачните заново, чтобы открыть новые рецепты!`);
-                
-                // Сброс игры (можно сделать более мягкий)
-                location.reload();
-            }, 1000);
-        }
+        const scientists = [
+            { id: 1, type: "🧬", name: "Петров", role: "Биолог", production: "+5/сек", color: "#00ff88" },
+            { id: 2, type: "⚡", name: "Сидорова", role: "Инженер", production: "+10/сек", color: "#ffaa00" },
+            { id: 3, type: "🔬", name: "Иванов", role: "Исследователь", production: "+8/сек", color: "#3366ff" },
+            { id: 4, type: "💊", name: "Васильева", role: "Медик", production: "+3/сек", color: "#ff3366" }
+        ];
         
         // =========== ИНИЦИАЛИЗАЦИЯ ===========
         function initGame() {
-            // Авто-сохранение каждые 30 секунд
-            setInterval(() => {
-                localStorage.setItem('mycelium68_save', JSON.stringify(gameState));
-                logEvent('Игра сохранена.', 'info');
-            }, 30000);
+            updateDisplay();
+            renderScientists();
+            updateLevelProgress();
             
-            // Загрузка сохранения
-            const save = localStorage.getItem('mycelium68_save');
-            if (save) {
-                try {
-                    const loaded = JSON.parse(save);
-                    Object.assign(gameState, loaded);
-                    logEvent('Сохранение загружено.', 'info');
-                } catch (e) {
-                    console.log('Не удалось загрузить сохранение');
+            // Автоматическое производство каждую секунду
+            setInterval(() => {
+                // Каждый учёный производит споры
+                let production = scientists.length * 5;
+                gameData.spores += production;
+                
+                // Обновляем отображение
+                updateDisplay();
+                
+                // Лог производства (раз в 10 секунд)
+                if (Math.random() > 0.9) {
+                    addLogEvent(`Учёные произвели ${production} споров`);
+                }
+            }, 1000);
+        }
+        
+        // =========== ОТОБРАЖЕНИЕ ===========
+        function updateDisplay() {
+            // Обновляем прогресс уровня
+            updateLevelProgress();
+            
+            // Обновляем счётчики
+            document.querySelectorAll('.counter')[0].textContent = `${scientists.length}/${gameData.maxScientists}`;
+            document.querySelectorAll('.counter')[1].textContent = `${gameData.rooms}/${gameData.maxRooms}`;
+        }
+        
+        function updateLevelProgress() {
+            const progress = (gameData.xp / gameData.xpNeeded) * 100;
+            document.getElementById('levelProgress').style.width = `${progress}%`;
+            document.querySelector('.progress-text').textContent = 
+                `${gameData.xp.toLocaleString()}/${gameData.xpNeeded.toLocaleString()} опыта`;
+        }
+        
+        function renderScientists() {
+            const grid = document.getElementById('heroesGrid');
+            grid.innerHTML = '';
+            
+            // Отображаем существующих учёных
+            scientists.forEach(scientist => {
+                const card = document.createElement('div');
+                card.className = 'hero-card';
+                card.innerHTML = `
+                    <div class="hero-icon">${scientist.type}</div>
+                    <div class="hero-name">${scientist.name}</div>
+                    <div class="hero-stats">
+                        <div class="hero-stat">${scientist.production}</div>
+                    </div>
+                    <div style="font-size: 11px; margin-top: 5px; color: ${scientist.color}">
+                        ${scientist.role}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            // Добавляем пустые слоты
+            for (let i = scientists.length; i < gameData.maxScientists; i++) {
+                const emptyCard = document.createElement('div');
+                emptyCard.className = 'hero-card empty';
+                emptyCard.innerHTML = `<div>+</div>`;
+                emptyCard.onclick = () => showRecruitModal();
+                grid.appendChild(emptyCard);
+            }
+        }
+        
+        // =========== МОДАЛЬНЫЕ ОКНА ===========
+        function showRecruitModal() {
+            document.getElementById('recruitModal').classList.add('active');
+        }
+        
+        function showBuildModal() {
+            document.getElementById('buildModal').classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        // =========== ДЕЙСТВИЯ ИГРОКА ===========
+        function recruitScientist(type) {
+            let cost = 0;
+            let newScientist = null;
+            
+            if (type === 'biol') {
+                cost = 1000;
+                if (gameData.spores >= cost) {
+                    newScientist = {
+                        id: scientists.length + 1,
+                        type: "🧫",
+                        name: "Новиков",
+                        role: "Миколог",
+                        production: "+6/сек",
+                        color: "#00cc88"
+                    };
+                }
+            } else if (type === 'engineer') {
+                cost = 2500;
+                if (gameData.spores >= cost) {
+                    newScientist = {
+                        id: scientists.length + 1,
+                        type: "🔧",
+                        name: "Кузнецов",
+                        role: "Техник",
+                        production: "+12/сек",
+                        color: "#ff9900"
+                    };
                 }
             }
             
-            // Таймер цикла дня/ночи
-            setInterval(() => {
-                if (gameState.location !== 'lab') {
-                    gameState.cycleProgress += 0.01;
-                    
-                    if (gameState.cycleProgress >= 1) {
-                        gameState.cycleProgress = 0;
-                        gameState.cycle = gameState.cycle === 'day' ? 'night' : 'day';
-                        gameState.day++;
-                        logEvent(`Наступил ${gameState.cycle === 'day' ? 'день' : 'ночь'}! День ${gameState.day}.`, 'info');
-                        
-                        // Ночью энергия тратится быстрее вне лаборатории
-                        if (gameState.cycle === 'night' && gameState.location !== 'lab') {
-                            gameState.energy -= 5;
-                            if (gameState.energy <= 0) {
-                                gameState.energy = 0;
-                                logEvent('Вы слишком устали! Вернитесь в лабораторию.', 'danger');
-                            }
-                        }
-                    }
-                    
-                    updateDisplay();
+            if (newScientist && gameData.spores >= cost) {
+                gameData.spores -= cost;
+                scientists.push(newScientist);
+                renderScientists();
+                updateDisplay();
+                closeModal('recruitModal');
+                addLogEvent(`Нанят учёный: ${newScientist.name} (${newScientist.role})`);
+                
+                // Награда за достижение
+                if (scientists.length === 5) {
+                    gameData.xp += 5000;
+                    addLogEvent(`Достижение: 5 учёных! +5,000 опыта`, true);
                 }
-            }, 3000); // Обновление каждые 3 секунды
+            } else {
+                alert(`Недостаточно споров! Нужно: ${cost}, у вас: ${gameData.spores}`);
+            }
+        }
+        
+        function attackEnemy() {
+            if (gameData.enemyHealth <= 0) return;
             
-            // Скрываем модальное окно при клике вне его
-            document.getElementById('craftModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeCraft();
+            // Урон зависит от количества учёных
+            const damage = 10 + (scientists.length * 2);
+            gameData.enemyHealth = Math.max(0, gameData.enemyHealth - damage);
+            
+            // Обновляем здоровье врага
+            const healthPercent = (gameData.enemyHealth / gameData.maxEnemyHealth) * 100;
+            document.getElementById('enemyHealth').style.width = `${healthPercent}%`;
+            
+            // Лог боя
+            addLogEvent(`Атака по аномалии! Нанесено ${damage} урона`);
+            
+            // Если враг побеждён
+            if (gameData.enemyHealth <= 0) {
+                const xpReward = 15000;
+                gameData.xp += xpReward;
+                
+                addLogEvent(`Аномалия уничтожена! Получено ${xpReward.toLocaleString()} опыта`, true);
+                
+                // Новый враг через 5 секунд
+                setTimeout(() => {
+                    gameData.enemyHealth = gameData.maxEnemyHealth;
+                    document.getElementById('enemyHealth').style.width = '100%';
+                    addLogEvent(`Появилась новая аномалия!`);
+                }, 5000);
+                
+                // Проверка уровня
+                if (gameData.xp >= gameData.xpNeeded) {
+                    levelUp();
                 }
-            });
+            }
             
-            // Стартовая локация
-            changeLocation('lab');
             updateDisplay();
         }
         
-        // Запуск игры при загрузке страницы
+        function levelUp() {
+            gameData.level++;
+            gameData.xp = gameData.xp - gameData.xpNeeded;
+            gameData.xpNeeded = Math.floor(gameData.xpNeeded * 1.3);
+            
+            addLogEvent(`🎉 Уровень повышен! Теперь уровень ${gameData.level}`, true);
+            
+            // Награда за уровень
+            gameData.spores += gameData.level * 1000;
+            
+            // Разблокировка комнат на определённых уровнях
+            if (gameData.level === 5) {
+                addLogEvent(`Разблокирована Оружейная лаборатория!`, true);
+            }
+            if (gameData.level === 8) {
+                addLogEvent(`Разблокирована Инфирмария!`, true);
+            }
+            
+            updateDisplay();
+        }
+        
+        function startBattle() {
+            addLogEvent(`Битва с аномалией началась!`);
+            // Можно добавить переход в отдельный экран боя
+        }
+        
+        function inviteFriend() {
+            addLogEvent(`Приглашение другу отправлено!`);
+            // Здесь будет интеграция с Telegram для приглашений
+        }
+        
+        function addLogEvent(message, isImportant = false) {
+            // Создаём временное уведомление
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${isImportant ? 'var(--accent)' : 'var(--panel)'};
+                color: ${isImportant ? 'black' : 'var(--text)'};
+                padding: 15px;
+                border-radius: 10px;
+                border: 2px solid ${isImportant ? 'var(--accent)' : 'var(--border)'};
+                z-index: 1000;
+                max-width: 300px;
+                animation: slideIn 0.5s, fadeOut 0.5s 2.5s;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 3000);
+        }
+        
+        // Запуск игры при загрузке
         window.onload = initGame;
+        
+        // Закрытие модальных окон по клику вне их
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
     </script>
 </body>
 </html>
