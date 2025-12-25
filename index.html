@@ -2,414 +2,712 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Star Miner | Telegram Game</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CYBER COURIER 2049</title>
     <style>
-        /* Адаптивные стили для телефона */
-        * { margin: 0; padding: 0; user-select: none; }
-        body { 
-            background: #0a0a2a; 
-            color: white; 
-            font-family: Arial, sans-serif;
-            height: 100vh;
+        * { 
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        
+        body {
+            background: #0a0a1a;
+            color: white;
+            font-family: 'Courier New', monospace;
             overflow: hidden;
+            width: 100vw;
+            height: 100vh;
             position: fixed;
-            width: 100%;
         }
-        .container {
-            padding: 20px;
-            max-width: 500px;
-            margin: 0 auto;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-        .currency {
-            font-size: 24px;
-            font-weight: bold;
-            color: #00ffcc;
-        }
-        .main-asteroid {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-        }
-        #asteroid {
-            width: 250px;
-            height: 250px;
-            background: radial-gradient(circle, #555, #222);
-            border-radius: 50%;
-            cursor: pointer;
+        
+        #gameContainer {
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            transition: transform 0.1s;
-        }
-        #asteroid:active {
-            transform: scale(0.95);
-        }
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .btn {
-            padding: 20px;
-            border: none;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            color: white;
-            transition: transform 0.2s;
-        }
-        .btn:active { transform: scale(0.95); }
-        .btn-upgrade { background: linear-gradient(135deg, #0066ff, #0099ff); }
-        .btn-shop { background: linear-gradient(135deg, #ff3366, #ff0066); }
-        .btn-boost { background: linear-gradient(135deg, #ffcc00, #ff9900); }
-        .btn-battle { background: linear-gradient(135deg, #00cc66, #00aa44); }
-        
-        .upgrades-list {
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .upgrade-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            margin-bottom: 10px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-        }
-        .upgrade-btn {
-            padding: 10px 20px;
-            background: #00cc66;
-            border: none;
-            border-radius: 10px;
-            color: white;
-            cursor: pointer;
-        }
-        /* Telegram Stars кнопка */
-        .stars-btn {
-            background: linear-gradient(135deg, #ffd700, #ffaa00);
-            color: #000;
-            font-weight: bold;
-            padding: 15px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .stars-btn::before {
-            content: "★";
-            font-size: 24px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
         
-        /* Анимация добычи */
-        @keyframes mine {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(3); opacity: 0; }
+        canvas {
+            display: block;
+            background: linear-gradient(to bottom, #000428, #004e92);
         }
-        .mine-effect {
+        
+        .ui-overlay {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background: radial-gradient(circle, #ffcc00, #ff9900);
-            border-radius: 50%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
-            animation: mine 0.5s ease-out;
+            z-index: 100;
+        }
+        
+        .stats {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #00ffea;
+        }
+        
+        .stat {
+            margin: 5px 0;
+            font-size: 18px;
+            text-shadow: 0 0 10px #00ffea;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 20px;
+        }
+        
+        .control-btn {
+            pointer-events: auto;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(0, 255, 234, 0.2);
+            border: 3px solid #00ffea;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0, 255, 234, 0.5);
+            transition: all 0.1s;
+        }
+        
+        .control-btn:active {
+            transform: scale(0.9);
+            background: rgba(0, 255, 234, 0.4);
+        }
+        
+        .logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            text-shadow: 0 0 20px #ff00ff;
+            animation: pulse 2s infinite;
+        }
+        
+        .logo h1 {
+            font-size: 36px;
+            color: #00ffea;
+            margin-bottom: 10px;
+        }
+        
+        .logo p {
+            color: #ff6b00;
+            font-size: 18px;
+        }
+        
+        .start-btn {
+            pointer-events: auto;
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #ff00ff, #00ffea);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .notification {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #ff6b00;
+            text-align: center;
+            animation: slideDown 0.5s;
+        }
+        
+        @keyframes slideDown {
+            from {
+                top: -50px;
+                opacity: 0;
+            }
+            to {
+                top: 100px;
+                opacity: 1;
+            }
+        }
+        
+        /* Неоновые эффекты */
+        .neon-text {
+            text-shadow: 
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 20px #fff,
+                0 0 40px #0ff,
+                0 0 80px #0ff,
+                0 0 90px #0ff,
+                0 0 100px #0ff,
+                0 0 150px #0ff;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="currency">⚡ <span id="energy">0</span></div>
-            <div class="currency">⭐ <span id="stars">0</span></div>
-            <div class="currency">👥 <span id="crew">1</span></div>
+    <div id="gameContainer">
+        <!-- Game will be rendered here -->
+    </div>
+    
+    <div class="ui-overlay">
+        <!-- Логотип и старт -->
+        <div class="logo" id="startScreen">
+            <h1 class="neon-text">CYBER COURIER 2049</h1>
+            <p>Доставляй данные. Выживай. Доминируй.</p>
+            <button class="start-btn" onclick="startGame()">START RUN</button>
+            <p style="margin-top: 20px; font-size: 14px; color: #aaa;">
+                Тап/Пробел - прыжок | Удержание - слайд
+            </p>
         </div>
         
-        <div class="main-asteroid">
-            <div id="asteroid">
-                ТАПАЙ ДЛЯ ДОБЫЧИ!
-                <div id="clickValue">+1 ⚡</div>
-            </div>
+        <!-- Статистика игры -->
+        <div class="stats" style="display: none;" id="gameStats">
+            <div class="stat">Дистанция: <span id="distance">0</span>m</div>
+            <div class="stat">Данные: <span id="data">0</span> GB</div>
+            <div class="stat">Скорость: <span id="speed">x1.0</span></div>
+            <div class="stat">Жизни: <span id="lives">3</span> ❤️</div>
         </div>
         
-        <div class="controls">
-            <button class="btn btn-upgrade" onclick="openUpgrades()">🛠 УЛУЧШЕНИЯ</button>
-            <button class="btn btn-shop" onclick="openShop()">🛒 МАГАЗИН STARS</button>
-            <button class="btn btn-boost" onclick="useBoost()">🚀 БУСТЕР (10⭐)</button>
-            <button class="btn btn-battle" onclick="openBattle()">⚔ ТУРНИР</button>
-        </div>
+        <!-- Уведомления -->
+        <div id="notification" class="notification" style="display: none;"></div>
         
-        <div class="upgrades-list" id="upgradesList" style="display: none;">
-            <h3>УЛУЧШЕНИЯ:</h3>
-            <div class="upgrade-item">
-                <div>
-                    <strong>Ручной бур</strong><br>
-                    +1 к клику
-                </div>
-                <button class="upgrade-btn" onclick="buyUpgrade('drill')">100 ⚡</button>
-            </div>
-            <div class="upgrade-item">
-                <div>
-                    <strong>Авто-дроид</strong><br>
-                    +2 ⚡/сек
-                </div>
-                <button class="upgrade-btn" onclick="buyUpgrade('drone')">500 ⚡</button>
-            </div>
-            <div class="upgrade-item">
-                <div>
-                    <strong>Лазерный резак</strong><br>
-                    x3 к доходу
-                </div>
-                <button class="upgrade-btn" onclick="buyUpgrade('laser')">2000 ⚡</button>
-            </div>
-        </div>
-        
-        <!-- Telegram Stars покупка -->
-        <div id="starsShop" style="display: none; margin-top: 20px;">
-            <button class="stars-btn" onclick="buyStarsBooster()">
-                БУСТЕР 10x на 30 мин<br>
-                <small>10 Stars</small>
-            </button>
-            <button class="stars-btn" style="margin-top: 10px;" onclick="buySkin()">
-                СКИН "Золотой бур"<br>
-                <small>50 Stars</small>
-            </button>
+        <!-- Управление -->
+        <div class="controls" style="display: none;" id="gameControls">
+            <button class="control-btn" id="jumpBtn">↑</button>
+            <button class="control-btn" id="slideBtn">↓</button>
         </div>
     </div>
 
     <script>
-        // ========== ИГРОВАЯ ЛОГИКА ==========
-        let gameState = {
-            energy: 0,
-            stars: 0,
-            crew: 1,
-            perClick: 1,
-            perSecond: 0,
-            upgrades: {
-                drill: 0,
-                drone: 0,
-                laser: 0
-            },
-            boostActive: false,
-            boostEnd: 0
+        // Конфигурация игры
+        const CONFIG = {
+            PLAYER_SPEED: 300,
+            GRAVITY: 800,
+            JUMP_FORCE: -400,
+            GROUND_HEIGHT: 100,
+            OBSTACLE_SPEED: 200,
+            DATA_SPAWN_RATE: 0.3
         };
-        
-        // Telegram WebApp
-        let tg = window.Telegram?.WebApp;
-        if (tg) {
+
+        // Состояние игры
+        let gameState = {
+            distance: 0,
+            dataCollected: 0,
+            speed: 1.0,
+            lives: 3,
+            isPlaying: false,
+            score: 0,
+            highScore: localStorage.getItem('cyberHighScore') || 0
+        };
+
+        // Telegram интеграция
+        let tg;
+        try {
+            tg = window.Telegram.WebApp;
             tg.expand();
-            tg.ready();
+            tg.enableClosingConfirmation();
             
-            // Проверяем баланс Stars
-            if (tg.initDataUnsafe?.user) {
-                // Здесь будет запрос к бэкенду для получения баланса
-                gameState.stars = 0; // Временно 0
+            // Настройка темы
+            tg.setHeaderColor('#0a0a1a');
+            tg.setBackgroundColor('#0a0a1a');
+            
+            // Получаем данные пользователя
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                document.getElementById('startScreen').innerHTML += `
+                    <div style="margin-top: 20px; padding: 10px; background: rgba(255,107,0,0.2); border-radius: 10px;">
+                        <p>👋 Привет, ${user.first_name}!</p>
+                        <p style="font-size: 12px;">Твой рекорд: ${gameState.highScore}m</p>
+                    </div>
+                `;
+            }
+        } catch (e) {
+            tg = null;
+            console.log("Режим разработки - без Telegram");
+        }
+
+        // Phaser конфигурация
+        const config = {
+            type: Phaser.AUTO,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            parent: 'gameContainer',
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: CONFIG.GRAVITY },
+                    debug: false
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            },
+            backgroundColor: 0x0a0a1a
+        };
+
+        let game;
+        let player;
+        let obstacles;
+        let dataItems;
+        let ground;
+        let cursors;
+        let distanceText;
+        let dataText;
+        let speedText;
+        let livesText;
+        let score = 0;
+        let gameSpeed = 1;
+        let isSliding = false;
+        let lastObstacleTime = 0;
+
+        // Загрузка ассетов
+        function preload() {
+            // Создаем простую графику вместо загрузки изображений
+            this.createPlayerGraphics();
+            this.createObstacleGraphics();
+            this.createDataGraphics();
+        }
+
+        // Создание игровых объектов
+        function create() {
+            // Создаем землю
+            ground = this.add.rectangle(
+                config.width / 2, 
+                config.height - CONFIG.GROUND_HEIGHT / 2,
+                config.width, 
+                CONFIG.GROUND_HEIGHT,
+                0x004466
+            );
+            
+            this.physics.add.existing(ground, true);
+            
+            // Создаем игрока
+            player = this.physics.add.sprite(100, config.height - 150, 'player');
+            player.setCollideWorldBounds(true);
+            player.body.setSize(40, 60);
+            player.setBounce(0.2);
+            
+            // Группы для объектов
+            obstacles = this.physics.add.group();
+            dataItems = this.physics.add.group();
+            
+            // Столкновения
+            this.physics.add.collider(player, ground);
+            this.physics.add.overlap(player, obstacles, hitObstacle, null, this);
+            this.physics.add.overlap(player, dataItems, collectData, null, this);
+            
+            // Управление
+            cursors = this.input.keyboard.createCursorKeys();
+            
+            // Сенсорное управление
+            this.input.on('pointerdown', () => {
+                if (player.body.touching.down) {
+                    player.setVelocityY(CONFIG.JUMP_FORCE);
+                    showNotification("ПРЫЖОК!");
+                }
+            });
+            
+            // UI элементы
+            distanceText = this.add.text(20, 20, 'Дистанция: 0m', {
+                fontSize: '20px',
+                fill: '#00ffea',
+                fontFamily: 'Courier New'
+            });
+            
+            dataText = this.add.text(20, 50, 'Данные: 0 GB', {
+                fontSize: '20px',
+                fill: '#ff00ff',
+                fontFamily: 'Courier New'
+            });
+            
+            speedText = this.add.text(20, 80, 'Скорость: x1.0', {
+                fontSize: '20px',
+                fill: '#ff6b00',
+                fontFamily: 'Courier New'
+            });
+            
+            livesText = this.add.text(20, 110, 'Жизни: 3 ❤️', {
+                fontSize: '20px',
+                fill: '#ff3366',
+                fontFamily: 'Courier New'
+            });
+            
+            // Начальный спавн объектов
+            this.time.addEvent({
+                delay: 1000,
+                callback: spawnObstacle,
+                callbackScope: this,
+                loop: true
+            });
+            
+            this.time.addEvent({
+                delay: 500,
+                callback: spawnData,
+                callbackScope: this,
+                loop: true
+            });
+            
+            // Увеличиваем скорость каждые 10 секунд
+            this.time.addEvent({
+                delay: 10000,
+                callback: increaseSpeed,
+                callbackScope: this,
+                loop: true
+            });
+        }
+
+        // Обновление игры
+        function update(time) {
+            if (!gameState.isPlaying) return;
+            
+            // Обновление дистанции
+            gameState.distance += Math.floor(gameSpeed);
+            distanceText.setText('Дистанция: ' + gameState.distance + 'm');
+            
+            // Управление с клавиатуры
+            if (cursors.space.isDown && player.body.touching.down) {
+                player.setVelocityY(CONFIG.JUMP_FORCE);
+            }
+            
+            // Слайд (удержание стрелки вниз)
+            if (cursors.down.isDown && player.body.touching.down && !isSliding) {
+                isSliding = true;
+                player.body.setSize(40, 30);
+                player.setY(player.y + 15);
+            } else if (!cursors.down.isDown && isSliding) {
+                isSliding = false;
+                player.body.setSize(40, 60);
+                player.setY(player.y - 15);
+            }
+            
+            // Автоматическое движение препятствий
+            obstacles.getChildren().forEach(obstacle => {
+                obstacle.x -= CONFIG.OBSTACLE_SPEED * gameSpeed;
+                if (obstacle.x < -50) {
+                    obstacle.destroy();
+                }
+            });
+            
+            // Движение данных
+            dataItems.getChildren().forEach(data => {
+                data.x -= CONFIG.OBSTACLE_SPEED * gameSpeed * 0.8;
+                data.rotation += 0.05;
+                if (data.x < -50) {
+                    data.destroy();
+                }
+            });
+            
+            // Спавн препятствий (рандомный)
+            if (time > lastObstacleTime + 1000 / gameSpeed) {
+                if (Math.random() > 0.7) {
+                    spawnObstacle.call(this);
+                }
+                lastObstacleTime = time;
             }
         }
-        
-        // Добыча руды
-        document.getElementById('asteroid').addEventListener('click', function(e) {
-            // Эффект клика
-            createMineEffect(e);
+
+        // Создание графики игрока
+        function createPlayerGraphics() {
+            const graphics = this.make.graphics({ x: 0, y: 0 }, false);
             
-            // Начисление
-            let earned = gameState.perClick;
-            if (gameState.boostActive) earned *= 10;
-            gameState.energy += earned;
+            // Тело (киборг)
+            graphics.fillStyle(0x00ffea);
+            graphics.fillRect(0, 0, 40, 60);
             
-            updateUI();
+            // Голова
+            graphics.fillStyle(0xffffff);
+            graphics.fillRect(10, 5, 20, 20);
             
-            // Анимация
-            showFloatingText(e.clientX, e.clientY, `+${earned} ⚡`);
+            // Глаза
+            graphics.fillStyle(0xff00ff);
+            graphics.fillRect(15, 10, 5, 5);
+            graphics.fillRect(30, 10, 5, 5);
+            
+            // Ноги
+            graphics.fillStyle(0xff6b00);
+            graphics.fillRect(5, 55, 10, 10);
+            graphics.fillRect(25, 55, 10, 10);
+            
+            graphics.generateTexture('player', 40, 60);
+            graphics.destroy();
+        }
+
+        // Создание графики препятствия
+        function createObstacleGraphics() {
+            const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+            
+            // Барьер
+            graphics.fillStyle(0xff3366);
+            graphics.fillRect(0, 0, 50, 80);
+            
+            // Неоновое свечение
+            graphics.lineStyle(3, 0xff00ff, 1);
+            graphics.strokeRect(2, 2, 46, 76);
+            
+            graphics.generateTexture('obstacle', 50, 80);
+            graphics.destroy();
+        }
+
+        // Создание графики данных
+        function createDataGraphics() {
+            const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+            
+            // Жесткий диск
+            graphics.fillStyle(0x00ffea);
+            graphics.fillCircle(15, 15, 15);
+            
+            // Центр
+            graphics.fillStyle(0x000000);
+            graphics.fillCircle(15, 15, 5);
+            
+            // Свечение
+            graphics.lineStyle(2, 0xffffff, 0.8);
+            graphics.strokeCircle(15, 15, 17);
+            
+            graphics.generateTexture('data', 30, 30);
+            graphics.destroy();
+        }
+
+        // Спавн препятствия
+        function spawnObstacle() {
+            const obstacle = obstacles.create(
+                config.width + 50,
+                config.height - CONFIG.GROUND_HEIGHT - 40,
+                'obstacle'
+            );
+            obstacle.setVelocityX(-CONFIG.OBSTACLE_SPEED * gameSpeed);
+        }
+
+        // Спавн данных
+        function spawnData() {
+            if (Math.random() < CONFIG.DATA_SPAWN_RATE) {
+                const data = dataItems.create(
+                    config.width + 50,
+                    Phaser.Math.Between(100, config.height - 200),
+                    'data'
+                );
+                data.setVelocityX(-CONFIG.OBSTACLE_SPEED * gameSpeed * 0.8);
+            }
+        }
+
+        // Столкновение с препятствием
+        function hitObstacle(player, obstacle) {
+            obstacle.destroy();
+            gameState.lives--;
+            livesText.setText('Жизни: ' + gameState.lives + ' ❤️');
+            
+            // Эффект повреждения
+            player.setTint(0xff0000);
+            this.time.delayedCall(200, () => {
+                player.clearTint();
+            });
+            
+            showNotification("СТОЛКНОВЕНИЕ! -1 жизнь");
+            
+            if (gameState.lives <= 0) {
+                gameOver();
+            }
+        }
+
+        // Сбор данных
+        function collectData(player, data) {
+            data.destroy();
+            gameState.dataCollected++;
+            gameState.score += 100 * gameSpeed;
+            dataText.setText('Данные: ' + gameState.dataCollected + ' GB');
+            
+            // Эффект сбора
+            player.setTint(0x00ff00);
+            this.time.delayedCall(100, () => {
+                player.clearTint();
+            });
+            
+            // Случайный бонус
+            if (Math.random() > 0.8) {
+                gameState.lives = Math.min(5, gameState.lives + 1);
+                livesText.setText('Жизни: ' + gameState.lives + ' ❤️');
+                showNotification("БОНУС: +1 жизнь!");
+            }
+        }
+
+        // Увеличение скорости
+        function increaseSpeed() {
+            gameSpeed += 0.1;
+            gameState.speed = gameSpeed.toFixed(1);
+            speedText.setText('Скорость: x' + gameState.speed);
+            showNotification("СКОРОСТЬ УВЕЛИЧЕНА!");
+        }
+
+        // Показать уведомление
+        function showNotification(text) {
+            const notification = document.getElementById('notification');
+            notification.textContent = text;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 1500);
+        }
+
+        // Завершение игры
+        function gameOver() {
+            gameState.isPlaying = false;
+            
+            // Сохраняем рекорд
+            if (gameState.distance > gameState.highScore) {
+                gameState.highScore = gameState.distance;
+                localStorage.setItem('cyberHighScore', gameState.highScore);
+            }
+            
+            // Показываем результаты
+            this.add.text(config.width / 2, config.height / 2 - 50, 'ИГРА ОКОНЧЕНА!', {
+                fontSize: '40px',
+                fill: '#ff3366',
+                fontFamily: 'Courier New'
+            }).setOrigin(0.5);
+            
+            this.add.text(config.width / 2, config.height / 2, `Дистанция: ${gameState.distance}m`, {
+                fontSize: '30px',
+                fill: '#00ffea',
+                fontFamily: 'Courier New'
+            }).setOrigin(0.5);
+            
+            this.add.text(config.width / 2, config.height / 2 + 40, `Собрано данных: ${gameState.dataCollected}GB`, {
+                fontSize: '30px',
+                fill: '#ff00ff',
+                fontFamily: 'Courier New'
+            }).setOrigin(0.5);
+            
+            this.add.text(config.width / 2, config.height / 2 + 80, `Рекорд: ${gameState.highScore}m`, {
+                fontSize: '25px',
+                fill: '#ff6b00',
+                fontFamily: 'Courier New'
+            }).setOrigin(0.5);
+            
+            // Кнопка рестарта
+            const restartBtn = this.add.text(config.width / 2, config.height / 2 + 140, 'ИГРАТЬ СНОВА', {
+                fontSize: '30px',
+                fill: '#ffffff',
+                backgroundColor: '#ff00ff',
+                padding: { x: 20, y: 10 },
+                fontFamily: 'Courier New'
+            }).setOrigin(0.5).setInteractive();
+            
+            restartBtn.on('pointerdown', () => {
+                this.scene.restart();
+                startGame();
+            });
+            
+            // Отправляем результат в Telegram
+            if (tg && tg.sendData) {
+                try {
+                    tg.sendData(JSON.stringify({
+                        action: 'game_complete',
+                        score: gameState.distance,
+                        data: gameState.dataCollected,
+                        highScore: gameState.highScore
+                    }));
+                } catch (e) {}
+            }
+        }
+
+        // Запуск игры
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameStats').style.display = 'block';
+            document.getElementById('gameControls').style.display = 'flex';
+            
+            gameState.isPlaying = true;
+            gameState.distance = 0;
+            gameState.dataCollected = 0;
+            gameState.lives = 3;
+            gameState.speed = 1.0;
+            gameSpeed = 1.0;
+            
+            // Обновляем UI
+            document.getElementById('distance').textContent = '0';
+            document.getElementById('data').textContent = '0';
+            document.getElementById('speed').textContent = 'x1.0';
+            document.getElementById('lives').textContent = '3';
+            
+            // Настройка управления для телефона
+            document.getElementById('jumpBtn').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (player && player.body.touching.down) {
+                    player.setVelocityY(CONFIG.JUMP_FORCE);
+                }
+            });
+            
+            document.getElementById('slideBtn').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (player && player.body.touching.down && !isSliding) {
+                    isSliding = true;
+                    player.body.setSize(40, 30);
+                    player.setY(player.y + 15);
+                }
+            });
+            
+            document.getElementById('slideBtn').addEventListener('touchend', () => {
+                if (isSliding) {
+                    isSliding = false;
+                    player.body.setSize(40, 60);
+                    player.setY(player.y - 15);
+                }
+            });
+            
+            // Запускаем Phaser игру
+            if (!game) {
+                game = new Phaser.Game(config);
+            } else {
+                game.scene.start('default');
+            }
+        }
+
+        // Ресайз при повороте экрана
+        window.addEventListener('resize', () => {
+            if (game) {
+                game.scale.resize(window.innerWidth, window.innerHeight);
+            }
         });
-        
-        // Автоматическая добыча
-        setInterval(() => {
-            if (gameState.perSecond > 0) {
-                let earned = gameState.perSecond;
-                if (gameState.boostActive) earned *= 10;
-                gameState.energy += earned;
-                updateUI();
-            }
-            
-            // Проверка бустера
-            if (gameState.boostActive && Date.now() > gameState.boostEnd) {
-                gameState.boostActive = false;
-                alert('Бустер закончился!');
-            }
-        }, 1000);
-        
-        // ========== УЛУЧШЕНИЯ ==========
-        function buyUpgrade(type) {
-            let cost = 0;
-            switch(type) {
-                case 'drill': cost = 100; break;
-                case 'drone': cost = 500; break;
-                case 'laser': cost = 2000; break;
-            }
-            
-            if (gameState.energy >= cost) {
-                gameState.energy -= cost;
-                gameState.upgrades[type]++;
-                
-                // Эффекты
-                switch(type) {
-                    case 'drill': 
-                        gameState.perClick++;
-                        break;
-                    case 'drone':
-                        gameState.perSecond += 2;
-                        break;
-                    case 'laser':
-                        gameState.perClick *= 3;
-                        break;
-                }
-                
-                updateUI();
-                alert(`Улучшение "${type}" куплено!`);
-            } else {
-                alert(`Недостаточно ⚡! Нужно: ${cost}`);
-            }
-        }
-        
-        // ========== МОНЕТИЗАЦИЯ ==========
-        function buyStarsBooster() {
-            if (gameState.stars >= 10) {
-                gameState.stars -= 10;
-                gameState.boostActive = true;
-                gameState.boostEnd = Date.now() + 30 * 60 * 1000; // 30 минут
-                updateUI();
-                alert('Бустер активирован на 30 минут! Доход x10!');
-                
-                // Здесь будет реальная покупка через Telegram Stars API
-                // tg.sendData(JSON.stringify({type: 'buy_booster', id: 'booster_10x'}));
-            } else {
-                alert('Недостаточно Stars! Купите через Telegram.');
-                // Открываем окно покупки Stars
-                if (tg) {
-                    tg.openInvoice({
-                        title: 'Купить 100 Stars',
-                        description: 'Для покупки бустеров и улучшений',
-                        currency: 'XTR',
-                        prices: [{ label: '100 Stars', amount: '100' }]
-                    });
-                }
-            }
-        }
-        
-        // ========== UI ФУНКЦИИ ==========
-        function updateUI() {
-            document.getElementById('energy').textContent = gameState.energy;
-            document.getElementById('stars').textContent = gameState.stars;
-            document.getElementById('crew').textContent = gameState.crew;
-            document.getElementById('clickValue').textContent = `+${gameState.perClick} ⚡`;
-        }
-        
-        function createMineEffect(e) {
-            const asteroid = document.getElementById('asteroid');
-            const rect = asteroid.getBoundingClientRect();
-            
-            const effect = document.createElement('div');
-            effect.className = 'mine-effect';
-            effect.style.left = (e.clientX - rect.left - 10) + 'px';
-            effect.style.top = (e.clientY - rect.top - 10) + 'px';
-            
-            asteroid.appendChild(effect);
-            setTimeout(() => effect.remove(), 500);
-        }
-        
-        function showFloatingText(x, y, text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            div.style.position = 'fixed';
-            div.style.left = (x - 20) + 'px';
-            div.style.top = (y - 30) + 'px';
-            div.style.color = '#ffcc00';
-            div.style.fontWeight = 'bold';
-            div.style.pointerEvents = 'none';
-            div.style.zIndex = '1000';
-            div.style.transition = 'all 0.5s';
-            div.style.opacity = '1';
-            
-            document.body.appendChild(div);
-            
-            setTimeout(() => {
-                div.style.opacity = '0';
-                div.style.top = (y - 100) + 'px';
-            }, 100);
-            
-            setTimeout(() => div.remove(), 600);
-        }
-        
-        function openUpgrades() {
-            document.getElementById('upgradesList').style.display = 
-                document.getElementById('upgradesList').style.display === 'none' ? 'block' : 'none';
-        }
-        
-        function openShop() {
-            document.getElementById('starsShop').style.display = 
-                document.getElementById('starsShop').style.display === 'none' ? 'block' : 'none';
-        }
-        
-        function useBoost() {
-            buyStarsBooster();
-        }
-        
-        function openBattle() {
-            alert('Турнирный режим откроется в следующем обновлении!');
-        }
-        
-        // ========== СОХРАНЕНИЕ ==========
-        function saveGame() {
-            localStorage.setItem('starMinerSave', JSON.stringify(gameState));
-        }
-        
-        function loadGame() {
-            const save = localStorage.getItem('starMinerSave');
-            if (save) {
-                gameState = JSON.parse(save);
-                updateUI();
-            }
-        }
-        
-        // Автосохранение каждые 30 сек
-        setInterval(saveGame, 30000);
-        
-        // Загрузка при старте
+
+        // Показываем рекорд при загрузке
         window.addEventListener('load', () => {
-            loadGame();
-            updateUI();
-            
-            // Имитация получения Stars (в реальности из Telegram)
-            setTimeout(() => {
-                gameState.stars = 20;
-                updateUI();
-                alert('🎉 Добро пожаловать! Вам начислено 20 Stars для тестирования!');
-            }, 1000);
+            if (gameState.highScore > 0) {
+                document.getElementById('startScreen').innerHTML += `
+                    <div style="margin-top: 20px; padding: 10px; background: rgba(255,0,255,0.2); border-radius: 10px;">
+                        <p>🏆 Лучший рекорд: ${gameState.highScore}m</p>
+                    </div>
+                `;
+            }
         });
     </script>
 </body>
