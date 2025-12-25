@@ -2,1006 +2,415 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Космический защитник</title>
-    
-    <!-- ДОБАВИМ ВЕРСИЮ В CSS И JS ДЛЯ БОРЬБЫ С КЭШЕМ -->
-    <style id="game-styles">
-        /* ОСНОВНЫЕ СТИЛИ */
-        * { 
-            margin: 0; padding: 0; box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            touch-action: manipulation;
-        }
-        
-        html, body {
-            width: 100%;
-            height: 100%;
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Miner | Telegram Game</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Адаптивные стили для телефона */
+        * { margin: 0; padding: 0; user-select: none; }
+        body { 
+            background: #0a0a2a; 
+            color: white; 
+            font-family: Arial, sans-serif;
+            height: 100vh;
             overflow: hidden;
             position: fixed;
-            background: #000;
-            font-family: Arial, sans-serif;
-        }
-        
-        /* ЭКРАНЫ */
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
+        }
+        .container {
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
             height: 100%;
-            display: none;
+            display: flex;
             flex-direction: column;
-            background: linear-gradient(135deg, #0a0a2a, #1a1a4a);
-            color: white;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
             padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            margin-bottom: 20px;
         }
-        
-        .screen.active {
-            display: flex;
-        }
-        
-        /* ГЛАВНОЕ МЕНЮ */
-        .game-title {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .game-title h1 {
+        .currency {
+            font-size: 24px;
+            font-weight: bold;
             color: #00ffcc;
-            font-size: 28px;
-            text-shadow: 0 0 10px #00ffcc;
-            margin-bottom: 10px;
         }
-        
-        .game-title p {
-            color: #aaa;
-            font-size: 16px;
-        }
-        
-        /* КНОПКИ МЕНЮ */
-        .menu-buttons {
+        .main-asteroid {
+            flex: 1;
             display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
-            max-width: 300px;
-            margin: 0 auto 40px;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
         }
-        
-        .menu-btn {
+        #asteroid {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, #555, #222);
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: transform 0.1s;
+        }
+        #asteroid:active {
+            transform: scale(0.95);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn {
             padding: 20px;
             border: none;
             border-radius: 15px;
             font-size: 18px;
             font-weight: bold;
-            color: white;
             cursor: pointer;
-            transition: transform 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .menu-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #0066ff, #0099ff);
-            box-shadow: 0 5px 15px rgba(0, 102, 255, 0.4);
-        }
-        
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        /* ИНФО О ПОЛЬЗОВАТЕЛЕ И РЕКОРД */
-        .user-info {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px 25px;
-            border-radius: 20px;
-            text-align: center;
-            min-width: 250px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .high-score {
-            color: #ffcc00;
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-        
-        /* ИГРОВОЙ ЭКРАН */
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .stats {
-            display: flex;
-            gap: 25px;
-        }
-        
-        .stat {
-            font-size: 20px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .stat.lives { color: #ff3366; }
-        .stat.score { color: #00ffcc; }
-        .stat.time { color: #ffcc00; }
-        
-        /* ИГРОВАЯ ОБЛАСТЬ */
-        #gameContainer {
-            flex: 1;
-            position: relative;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 15px;
-        }
-        
-        #gameCanvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        
-        /* УПРАВЛЕНИЕ - ПРОСТЫЕ КНОПКИ */
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        
-        .control-btn {
-            padding: 25px 15px;
-            border: none;
-            border-radius: 15px;
-            font-size: 24px;
-            background: rgba(255, 255, 255, 0.15);
             color: white;
-            cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s;
         }
+        .btn:active { transform: scale(0.95); }
+        .btn-upgrade { background: linear-gradient(135deg, #0066ff, #0099ff); }
+        .btn-shop { background: linear-gradient(135deg, #ff3366, #ff0066); }
+        .btn-boost { background: linear-gradient(135deg, #ffcc00, #ff9900); }
+        .btn-battle { background: linear-gradient(135deg, #00cc66, #00aa44); }
         
-        .control-btn:active {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0.95);
-        }
-        
-        .fire-btn {
-            background: linear-gradient(135deg, #ff3366, #ff0066);
-            font-size: 20px;
-            font-weight: bold;
-        }
-        
-        .menu-btn-game {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            padding: 15px;
-            margin-top: 15px;
-            width: 100%;
-            max-width: 300px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        /* ИНСТРУКЦИИ */
-        .instructions-container {
-            background: rgba(255, 255, 255, 0.05);
+        .upgrades-list {
+            background: rgba(255,255,255,0.05);
             border-radius: 15px;
             padding: 20px;
-            margin: 20px 0;
-            max-width: 400px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
         }
-        
-        .instruction {
+        .upgrade-item {
             display: flex;
-            align-items: center;
-            margin: 15px 0;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
+            justify-content: space-between;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.1);
             border-radius: 10px;
         }
-        
-        .instruction-icon {
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 255, 204, 0.1);
-            border-radius: 50%;
+        .upgrade-btn {
+            padding: 10px 20px;
+            background: #00cc66;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+        }
+        /* Telegram Stars кнопка */
+        .stars-btn {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #000;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 15px;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .stars-btn::before {
+            content: "★";
             font-size: 24px;
-            color: #00ffcc;
         }
         
-        /* АДАПТИВНОСТЬ */
-        @media (max-height: 700px) {
-            .game-title h1 { font-size: 24px; }
-            .menu-btn { padding: 15px; }
-            .control-btn { padding: 20px 10px; font-size: 20px; }
+        /* Анимация добычи */
+        @keyframes mine {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
         }
-        
-        @media (orientation: landscape) {
-            #gameScreen {
-                flex-direction: row;
-                padding: 10px;
-            }
-            
-            .game-header {
-                flex-direction: column;
-                width: 120px;
-                margin-right: 10px;
-                margin-bottom: 0;
-                justify-content: flex-start;
-                gap: 20px;
-            }
-            
-            .stats {
-                flex-direction: column;
-                gap: 20px;
-            }
-            
-            #gameContainer {
-                margin-bottom: 0;
-                margin-right: 10px;
-            }
-            
-            .controls {
-                width: 120px;
-                grid-template-columns: 1fr;
-            }
-            
-            .menu-btn-game {
-                width: 120px;
-                margin-top: 10px;
-            }
+        .mine-effect {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ffcc00, #ff9900);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: mine 0.5s ease-out;
         }
     </style>
 </head>
 <body>
-    <!-- ГЛАВНОЕ МЕНЮ -->
-    <div id="menuScreen" class="screen active">
-        <div class="game-title">
-            <h1><span style="font-size: 40px;">🚀</span><br>КОСМИЧЕСКИЙ ЗАЩИТНИК</h1>
-            <p>Защити планету от астероидов!</p>
+    <div class="container">
+        <div class="header">
+            <div class="currency">⚡ <span id="energy">0</span></div>
+            <div class="currency">⭐ <span id="stars">0</span></div>
+            <div class="currency">👥 <span id="crew">1</span></div>
         </div>
         
-        <div class="menu-buttons">
-            <button class="menu-btn btn-primary" onclick="startGame()">
-                <span style="font-size: 24px;">▶️</span> НАЧАТЬ ИГРУ
-            </button>
-            <button class="menu-btn btn-secondary" onclick="showScreen('howToScreen')">
-                <span style="font-size: 24px;">❓</span> КАК ИГРАТЬ
-            </button>
-        </div>
-        
-        <div class="user-info">
-            <p>🎮 ВЕРСИЯ: <span id="gameVersion">2.0</span></p>
-            <p class="high-score">🏆 РЕКОРД: <span id="highScoreDisplay">0</span></p>
-            <p style="font-size: 12px; color: #aaa; margin-top: 10px;">
-                Обновлено: <span id="lastUpdate">только что</span>
-            </p>
-        </div>
-    </div>
-
-    <!-- ИГРОВОЙ ЭКРАН -->
-    <div id="gameScreen" class="screen">
-        <div class="game-header">
-            <div class="stats">
-                <div class="stat lives">
-                    <span style="font-size: 24px;">❤️</span> <span id="lives">3</span>
-                </div>
-                <div class="stat score">
-                    <span style="font-size: 24px;">⭐</span> <span id="score">0</span>
-                </div>
-                <div class="stat time">
-                    <span style="font-size: 24px;">⏱️</span> <span id="time">60</span>с
-                </div>
+        <div class="main-asteroid">
+            <div id="asteroid">
+                ТАПАЙ ДЛЯ ДОБЫЧИ!
+                <div id="clickValue">+1 ⚡</div>
             </div>
-        </div>
-        
-        <div id="gameContainer">
-            <canvas id="gameCanvas"></canvas>
         </div>
         
         <div class="controls">
-            <button class="control-btn" id="leftBtn">
-                <span style="font-size: 32px;">←</span>
-            </button>
-            
-            <button class="control-btn fire-btn" id="fireBtn">
-                <span style="font-size: 28px;">🔥</span><br>ОГОНЬ
-            </button>
-            
-            <button class="control-btn" id="rightBtn">
-                <span style="font-size: 32px;">→</span>
-            </button>
+            <button class="btn btn-upgrade" onclick="openUpgrades()">🛠 УЛУЧШЕНИЯ</button>
+            <button class="btn btn-shop" onclick="openShop()">🛒 МАГАЗИН STARS</button>
+            <button class="btn btn-boost" onclick="useBoost()">🚀 БУСТЕР (10⭐)</button>
+            <button class="btn btn-battle" onclick="openBattle()">⚔ ТУРНИР</button>
         </div>
         
-        <button class="menu-btn-game" onclick="returnToMenu()">
-            <span style="font-size: 24px;">🏠</span> В МЕНЮ
-        </button>
-    </div>
-
-    <!-- ЭКРАН ИНСТРУКЦИЙ -->
-    <div id="howToScreen" class="screen">
-        <div class="game-title">
-            <h1><span style="font-size: 40px;">🎮</span><br>КАК ИГРАТЬ</h1>
-        </div>
-        
-        <div class="instructions-container">
-            <div class="instruction">
-                <div class="instruction-icon">←</div>
+        <div class="upgrades-list" id="upgradesList" style="display: none;">
+            <h3>УЛУЧШЕНИЯ:</h3>
+            <div class="upgrade-item">
                 <div>
-                    <strong>ДВИЖЕНИЕ ВЛЕВО</strong>
-                    <p>Нажмите левую кнопку</p>
+                    <strong>Ручной бур</strong><br>
+                    +1 к клику
                 </div>
+                <button class="upgrade-btn" onclick="buyUpgrade('drill')">100 ⚡</button>
             </div>
-            
-            <div class="instruction">
-                <div class="instruction-icon">→</div>
+            <div class="upgrade-item">
                 <div>
-                    <strong>ДВИЖЕНИЕ ВПРАВО</strong>
-                    <p>Нажмите правую кнопку</p>
+                    <strong>Авто-дроид</strong><br>
+                    +2 ⚡/сек
                 </div>
+                <button class="upgrade-btn" onclick="buyUpgrade('drone')">500 ⚡</button>
             </div>
-            
-            <div class="instruction">
-                <div class="instruction-icon">🔥</div>
+            <div class="upgrade-item">
                 <div>
-                    <strong>СТРЕЛЬБА</strong>
-                    <p>Нажмите кнопку ОГОНЬ</p>
+                    <strong>Лазерный резак</strong><br>
+                    x3 к доходу
                 </div>
-            </div>
-            
-            <div class="instruction">
-                <div class="instruction-icon">💥</div>
-                <div>
-                    <strong>ИЗБЕГАЙТЕ АСТЕРОИДОВ</strong>
-                    <p>У вас 3 жизни</p>
-                </div>
+                <button class="upgrade-btn" onclick="buyUpgrade('laser')">2000 ⚡</button>
             </div>
         </div>
         
-        <div class="menu-buttons">
-            <button class="menu-btn btn-primary" onclick="showScreen('menuScreen')">
-                <span style="font-size: 24px;">←</span> НАЗАД В МЕНЮ
+        <!-- Telegram Stars покупка -->
+        <div id="starsShop" style="display: none; margin-top: 20px;">
+            <button class="stars-btn" onclick="buyStarsBooster()">
+                БУСТЕР 10x на 30 мин<br>
+                <small>10 Stars</small>
+            </button>
+            <button class="stars-btn" style="margin-top: 10px;" onclick="buySkin()">
+                СКИН "Золотой бур"<br>
+                <small>50 Stars</small>
             </button>
         </div>
     </div>
 
     <script>
-        // ========== ФИКС ДЛЯ КЭША ==========
-        // Добавляем версию в URL чтобы сбросить кэш
-        const VERSION = '2.1-' + Date.now();
-        document.getElementById('gameVersion').textContent = VERSION.split('-')[0];
-        document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
-        
-        // Принудительно обновляем стили
-        document.getElementById('game-styles').setAttribute('data-version', VERSION);
-        
-        // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
-        let gameState = {
-            screen: 'menu',
-            score: 0,
-            lives: 3,
-            time: 60,
-            isPlaying: false,
-            highScore: 0
-        };
-        
-        let gameObjects = {
-            player: { x: 0, y: 0, width: 40, height: 60, speed: 6 },
-            bullets: [],
-            asteroids: [],
-            explosions: []
-        };
-        
-        let controls = {
-            left: false,
-            right: false
-        };
-        
-        let canvas, ctx;
-        let animationId = null;
-        let gameInterval = null;
-        let asteroidInterval = null;
-        let timerInterval = null;
-
-        // ========== УПРАВЛЕНИЕ ЭКРАНАМИ ==========
-        function showScreen(screenId) {
-            // Скрываем все экраны
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            
-            // Показываем нужный экран
-            document.getElementById(screenId + 'Screen').classList.add('active');
-            gameState.screen = screenId;
-            
-            // Если переходим в меню - загружаем актуальный рекорд
-            if (screenId === 'menu') {
-                loadHighScore();
-            }
-            
-            // Если выходим из игры - останавливаем её
-            if (screenId !== 'game') {
-                stopGame();
-            }
-        }
-        
-        function startGame() {
-            showScreen('game');
-            initGame();
-        }
-        
-        function returnToMenu() {
-            stopGame();
-            showScreen('menu');
-        }
-
-        // ========== ИНИЦИАЛИЗАЦИЯ ИГРЫ ==========
-        function initGame() {
-            // Получаем canvas
-            canvas = document.getElementById('gameCanvas');
-            ctx = canvas.getContext('2d');
-            
-            // Устанавливаем размер
-            resizeCanvas();
-            
-            // Сбрасываем состояние
-            resetGame();
-            
-            // Настраиваем управление
-            setupControls();
-            
-            // Запускаем игровые процессы
-            startGameLoops();
-            
-            // Обновляем UI
-            updateGameUI();
-        }
-        
-        function resetGame() {
-            // Сброс позиции игрока
-            gameObjects.player.x = (canvas.width - gameObjects.player.width) / 2;
-            gameObjects.player.y = canvas.height - gameObjects.player.height - 20;
-            
-            // Очищаем массивы
-            gameObjects.bullets = [];
-            gameObjects.asteroids = [];
-            gameObjects.explosions = [];
-            
-            // Сброс статистики
-            gameState.score = 0;
-            gameState.lives = 3;
-            gameState.time = 60;
-            gameState.isPlaying = true;
-            
-            // Сброс управления
-            controls.left = false;
-            controls.right = false;
-        }
-        
-        function resizeCanvas() {
-            const container = document.getElementById('gameContainer');
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            
-            // Масштабируем игрока
-            const baseSize = Math.min(40, canvas.width * 0.1);
-            gameObjects.player.width = baseSize;
-            gameObjects.player.height = baseSize * 1.5;
-            gameObjects.player.speed = canvas.width * 0.02;
-        }
-        
-        // ========== УПРАВЛЕНИЕ ==========
-        function setupControls() {
-            const leftBtn = document.getElementById('leftBtn');
-            const rightBtn = document.getElementById('rightBtn');
-            const fireBtn = document.getElementById('fireBtn');
-            
-            // ЛЕВАЯ КНОПКА
-            leftBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                controls.left = true;
-                leftBtn.style.background = 'rgba(255, 255, 255, 0.3)';
-            });
-            
-            leftBtn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                controls.left = false;
-                leftBtn.style.background = '';
-            });
-            
-            leftBtn.addEventListener('mousedown', () => {
-                controls.left = true;
-                leftBtn.style.background = 'rgba(255, 255, 255, 0.3)';
-            });
-            
-            leftBtn.addEventListener('mouseup', () => {
-                controls.left = false;
-                leftBtn.style.background = '';
-            });
-            
-            leftBtn.addEventListener('mouseleave', () => {
-                controls.left = false;
-                leftBtn.style.background = '';
-            });
-            
-            // ПРАВАЯ КНОПКА
-            rightBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                controls.right = true;
-                rightBtn.style.background = 'rgba(255, 255, 255, 0.3)';
-            });
-            
-            rightBtn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                controls.right = false;
-                rightBtn.style.background = '';
-            });
-            
-            rightBtn.addEventListener('mousedown', () => {
-                controls.right = true;
-                rightBtn.style.background = 'rgba(255, 255, 255, 0.3)';
-            });
-            
-            rightBtn.addEventListener('mouseup', () => {
-                controls.right = false;
-                rightBtn.style.background = '';
-            });
-            
-            rightBtn.addEventListener('mouseleave', () => {
-                controls.right = false;
-                rightBtn.style.background = '';
-            });
-            
-            // КНОПКА ОГОНЬ
-            fireBtn.addEventListener('click', shoot);
-            
-            // КЛАВИАТУРА (для компьютера)
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft') controls.left = true;
-                if (e.key === 'ArrowRight') controls.right = true;
-                if (e.key === ' ' || e.key === 'Spacebar') {
-                    e.preventDefault();
-                    shoot();
-                }
-            });
-            
-            document.addEventListener('keyup', (e) => {
-                if (e.key === 'ArrowLeft') controls.left = false;
-                if (e.key === 'ArrowRight') controls.right = false;
-            });
-            
-            // РЕСАЙЗ
-            window.addEventListener('resize', resizeCanvas);
-            window.addEventListener('orientationchange', () => {
-                setTimeout(resizeCanvas, 100);
-            });
-        }
-        
-        function shoot() {
-            if (!gameState.isPlaying) return;
-            
-            gameObjects.bullets.push({
-                x: gameObjects.player.x + gameObjects.player.width / 2,
-                y: gameObjects.player.y,
-                width: 5,
-                height: 15
-            });
-        }
-
         // ========== ИГРОВАЯ ЛОГИКА ==========
-        function gameLoop() {
-            if (!gameState.isPlaying) return;
-            
-            // ОБНОВЛЕНИЕ
-            updateGame();
-            
-            // ОТРИСОВКА
-            drawGame();
-            
-            // СЛЕДУЮЩИЙ КАДР
-            animationId = requestAnimationFrame(gameLoop);
-        }
+        let gameState = {
+            energy: 0,
+            stars: 0,
+            crew: 1,
+            perClick: 1,
+            perSecond: 0,
+            upgrades: {
+                drill: 0,
+                drone: 0,
+                laser: 0
+            },
+            boostActive: false,
+            boostEnd: 0
+        };
         
-        function updateGame() {
-            // ДВИЖЕНИЕ ИГРОКА
-            if (controls.left) {
-                gameObjects.player.x = Math.max(0, gameObjects.player.x - gameObjects.player.speed);
-            }
-            if (controls.right) {
-                gameObjects.player.x = Math.min(
-                    canvas.width - gameObjects.player.width,
-                    gameObjects.player.x + gameObjects.player.speed
-                );
-            }
+        // Telegram WebApp
+        let tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.ready();
             
-            // ОБНОВЛЕНИЕ ПУЛЬ
-            for (let i = gameObjects.bullets.length - 1; i >= 0; i--) {
-                gameObjects.bullets[i].y -= 8;
-                
-                if (gameObjects.bullets[i].y < 0) {
-                    gameObjects.bullets.splice(i, 1);
-                }
-            }
-            
-            // ОБНОВЛЕНИЕ АСТЕРОИДОВ
-            for (let i = gameObjects.asteroids.length - 1; i >= 0; i--) {
-                const asteroid = gameObjects.asteroids[i];
-                asteroid.y += asteroid.speed;
-                
-                // СТОЛКНОВЕНИЕ С ИГРОКОМ
-                if (checkCollision(gameObjects.player, asteroid)) {
-                    gameState.lives--;
-                    createExplosion(asteroid.x, asteroid.y, asteroid.size);
-                    gameObjects.asteroids.splice(i, 1);
-                    updateGameUI();
-                    
-                    if (gameState.lives <= 0) {
-                        gameOver();
-                    }
-                    continue;
-                }
-                
-                // СТОЛКНОВЕНИЕ С ПУЛЯМИ
-                for (let j = gameObjects.bullets.length - 1; j >= 0; j--) {
-                    if (checkCollision(gameObjects.bullets[j], asteroid)) {
-                        gameState.score += 10;
-                        createExplosion(asteroid.x, asteroid.y, asteroid.size);
-                        gameObjects.asteroids.splice(i, 1);
-                        gameObjects.bullets.splice(j, 1);
-                        updateGameUI();
-                        
-                        // ПРОВЕРЯЕМ РЕКОРД В РЕАЛЬНОМ ВРЕМЕНИ
-                        checkHighScore();
-                        break;
-                    }
-                }
-                
-                // УДАЛЕНИЕ ЗА ЭКРАНОМ
-                if (asteroid.y > canvas.height) {
-                    gameObjects.asteroids.splice(i, 1);
-                }
-            }
-            
-            // ОБНОВЛЕНИЕ ВЗРЫВОВ
-            for (let i = gameObjects.explosions.length - 1; i >= 0; i--) {
-                gameObjects.explosions[i].life--;
-                if (gameObjects.explosions[i].life <= 0) {
-                    gameObjects.explosions.splice(i, 1);
-                }
+            // Проверяем баланс Stars
+            if (tg.initDataUnsafe?.user) {
+                // Здесь будет запрос к бэкенду для получения баланса
+                gameState.stars = 0; // Временно 0
             }
         }
         
-        function drawGame() {
-            // ФОН
-            ctx.fillStyle = 'rgba(10, 10, 30, 0.3)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Добыча руды
+        document.getElementById('asteroid').addEventListener('click', function(e) {
+            // Эффект клика
+            createMineEffect(e);
             
-            // ЗВЕЗДЫ
-            drawStars();
+            // Начисление
+            let earned = gameState.perClick;
+            if (gameState.boostActive) earned *= 10;
+            gameState.energy += earned;
             
-            // ИГРОК
-            drawPlayer();
+            updateUI();
             
-            // ПУЛИ
-            gameObjects.bullets.forEach(bullet => {
-                ctx.fillStyle = '#ffff00';
-                ctx.fillRect(bullet.x - 2, bullet.y, 5, 15);
-                
-                // СВЕЧЕНИЕ
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#ffff00';
-                ctx.fillRect(bullet.x - 2, bullet.y, 5, 15);
-                ctx.shadowBlur = 0;
-            });
-            
-            // АСТЕРОИДЫ
-            gameObjects.asteroids.forEach(asteroid => {
-                ctx.fillStyle = '#888888';
-                ctx.beginPath();
-                ctx.arc(asteroid.x, asteroid.y, asteroid.size, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            
-            // ВЗРЫВЫ
-            gameObjects.explosions.forEach(explosion => {
-                const alpha = explosion.life / 20;
-                ctx.globalAlpha = alpha;
-                ctx.fillStyle = '#ff6600';
-                ctx.beginPath();
-                ctx.arc(explosion.x, explosion.y, explosion.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1.0;
-            });
-        }
-        
-        function drawStars() {
-            ctx.fillStyle = '#ffffff';
-            for (let i = 0; i < 50; i++) {
-                const x = (i * 7.3) % canvas.width;
-                const y = (i * 3.1) % canvas.height;
-                const size = Math.random() * 1.5;
-                
-                ctx.beginPath();
-                ctx.arc(x, y, size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-        
-        function drawPlayer() {
-            const p = gameObjects.player;
-            
-            // КОРПУС
-            ctx.fillStyle = '#00ccff';
-            ctx.beginPath();
-            ctx.moveTo(p.x + p.width/2, p.y);
-            ctx.lineTo(p.x, p.y + p.height);
-            ctx.lineTo(p.x + p.width, p.y + p.height);
-            ctx.closePath();
-            ctx.fill();
-            
-            // КАБИНА
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(p.x + p.width/2, p.y + p.height/3, p.width/4, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // ДВИГАТЕЛЬ
-            ctx.fillStyle = '#ff6600';
-            ctx.fillRect(p.x + p.width/4, p.y + p.height, p.width/2, 10);
-        }
-        
-        function createExplosion(x, y, size) {
-            gameObjects.explosions.push({
-                x: x,
-                y: y,
-                size: size * 1.5,
-                life: 20
-            });
-        }
-        
-        function checkCollision(obj1, obj2) {
-            return obj1.x < obj2.x + obj2.size * 2 &&
-                   obj1.x + (obj1.width || 10) > obj2.x &&
-                   obj1.y < obj2.y + obj2.size * 2 &&
-                   (obj1.height || 10) + obj1.y > obj2.y;
-        }
-
-        // ========== ИГРОВЫЕ ИНТЕРВАЛЫ ==========
-        function startGameLoops() {
-            // ОСНОВНОЙ ИГРОВОЙ ЦИКЛ
-            if (animationId) cancelAnimationFrame(animationId);
-            animationId = requestAnimationFrame(gameLoop);
-            
-            // СОЗДАНИЕ АСТЕРОИДОВ
-            if (asteroidInterval) clearInterval(asteroidInterval);
-            asteroidInterval = setInterval(() => {
-                if (!gameState.isPlaying) return;
-                
-                const size = 15 + Math.random() * 20;
-                gameObjects.asteroids.push({
-                    x: Math.random() * (canvas.width - size * 2),
-                    y: -size,
-                    size: size,
-                    speed: 1 + Math.random() * 3
-                });
-            }, 1000);
-            
-            // ТАЙМЕР
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if (!gameState.isPlaying) {
-                    clearInterval(timerInterval);
-                    return;
-                }
-                
-                gameState.time--;
-                updateGameUI();
-                
-                if (gameState.time <= 0) {
-                    gameOver();
-                }
-            }, 1000);
-        }
-        
-        function stopGame() {
-            gameState.isPlaying = false;
-            
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-                animationId = null;
-            }
-            
-            if (asteroidInterval) {
-                clearInterval(asteroidInterval);
-                asteroidInterval = null;
-            }
-            
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-        }
-        
-        // ========== РЕКОРДЫ ==========
-        function loadHighScore() {
-            const savedScore = localStorage.getItem('cosmicDefenderHighScore');
-            gameState.highScore = savedScore ? parseInt(savedScore) : 0;
-            document.getElementById('highScoreDisplay').textContent = gameState.highScore;
-        }
-        
-        function saveHighScore() {
-            if (gameState.score > gameState.highScore) {
-                gameState.highScore = gameState.score;
-                localStorage.setItem('cosmicDefenderHighScore', gameState.highScore);
-                document.getElementById('highScoreDisplay').textContent = gameState.highScore;
-                return true;
-            }
-            return false;
-        }
-        
-        function checkHighScore() {
-            if (gameState.score > gameState.highScore) {
-                // Обновляем рекорд в реальном времени
-                gameState.highScore = gameState.score;
-                localStorage.setItem('cosmicDefenderHighScore', gameState.highScore);
-                
-                // Показываем уведомление в игре
-                showHighScoreNotification();
-            }
-        }
-        
-        function showHighScoreNotification() {
-            // Создаем всплывающее уведомление
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(255, 204, 0, 0.9);
-                color: #000;
-                padding: 15px 25px;
-                border-radius: 10px;
-                font-size: 20px;
-                font-weight: bold;
-                z-index: 1000;
-                animation: fadeInOut 2s;
-            `;
-            
-            // Добавляем анимацию
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes fadeInOut {
-                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-                    20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-                    40% { transform: translate(-50%, -50%) scale(1); }
-                    80% { opacity: 1; }
-                    100% { opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            notification.innerHTML = '🏆 НОВЫЙ РЕКОРД! 🏆';
-            document.getElementById('gameContainer').appendChild(notification);
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 2000);
-        }
-
-        // ========== UI ==========
-        function updateGameUI() {
-            document.getElementById('score').textContent = gameState.score;
-            document.getElementById('lives').textContent = gameState.lives;
-            document.getElementById('time').textContent = gameState.time;
-        }
-        
-        function gameOver() {
-            stopGame();
-            
-            // Сохраняем рекорд
-            const isNewRecord = saveHighScore();
-            
-            // Показываем результат
-            setTimeout(() => {
-                let message = `🎮 ИГРА ОКОНЧЕНА!\n\n`;
-                message += `Ваш счёт: ${gameState.score}\n`;
-                message += `Рекорд: ${gameState.highScore}\n\n`;
-                
-                if (isNewRecord) {
-                    message += `🎉 ПОЗДРАВЛЯЕМ! НОВЫЙ РЕКОРД! 🎉`;
-                } else if (gameState.score === gameState.highScore) {
-                    message += `👍 Повторили свой рекорд!`;
-                } else {
-                    message += `Рекорд к победе: ${gameState.highScore - gameState.score} очков`;
-                }
-                
-                alert(message);
-                returnToMenu();
-            }, 500);
-        }
-
-        // ========== ЗАПУСК ==========
-        window.addEventListener('load', () => {
-            console.log('Игра загружена, версия:', VERSION);
-            
-            // Telegram WebApp
-            try {
-                const tg = window.Telegram?.WebApp;
-                if (tg) {
-                    tg.expand();
-                    tg.enableClosingConfirmation();
-                    
-                    // Устанавливаем тему
-                    tg.setHeaderColor('#0a0a2a');
-                    tg.setBackgroundColor('#0a0a2a');
-                    
-                    // Показываем имя пользователя
-                    const user = tg.initDataUnsafe?.user;
-                    if (user) {
-                        const userInfo = document.querySelector('.user-info');
-                        userInfo.innerHTML = `
-                            <p>👨‍🚀 Игрок: <strong>${user.first_name}</strong></p>
-                            <p class="high-score">🏆 РЕКОРД: <span id="highScoreDisplay">${gameState.highScore}</span></p>
-                            <p style="font-size: 12px; color: #aaa; margin-top: 10px;">
-                                Версия ${VERSION.split('-')[0]}
-                            </p>
-                        `;
-                    }
-                }
-            } catch (e) {
-                console.log('Telegram не обнаружен, локальный режим');
-            }
-            
-            // Загружаем рекорд
-            loadHighScore();
-            
-            // Принудительно обновляем рекорд в меню каждые 2 секунды
-            setInterval(() => {
-                if (gameState.screen === 'menu') {
-                    loadHighScore();
-                }
-            }, 2000);
+            // Анимация
+            showFloatingText(e.clientX, e.clientY, `+${earned} ⚡`);
         });
-
-        // ========== ФИКС ДЛЯ КЭША TELEGRAM ==========
-        // Принудительно перезагружаем страницу при каждом открытии
-        if (window.location.search.indexOf('nocache') === -1) {
-            window.location.search = '?nocache=' + Date.now();
+        
+        // Автоматическая добыча
+        setInterval(() => {
+            if (gameState.perSecond > 0) {
+                let earned = gameState.perSecond;
+                if (gameState.boostActive) earned *= 10;
+                gameState.energy += earned;
+                updateUI();
+            }
+            
+            // Проверка бустера
+            if (gameState.boostActive && Date.now() > gameState.boostEnd) {
+                gameState.boostActive = false;
+                alert('Бустер закончился!');
+            }
+        }, 1000);
+        
+        // ========== УЛУЧШЕНИЯ ==========
+        function buyUpgrade(type) {
+            let cost = 0;
+            switch(type) {
+                case 'drill': cost = 100; break;
+                case 'drone': cost = 500; break;
+                case 'laser': cost = 2000; break;
+            }
+            
+            if (gameState.energy >= cost) {
+                gameState.energy -= cost;
+                gameState.upgrades[type]++;
+                
+                // Эффекты
+                switch(type) {
+                    case 'drill': 
+                        gameState.perClick++;
+                        break;
+                    case 'drone':
+                        gameState.perSecond += 2;
+                        break;
+                    case 'laser':
+                        gameState.perClick *= 3;
+                        break;
+                }
+                
+                updateUI();
+                alert(`Улучшение "${type}" куплено!`);
+            } else {
+                alert(`Недостаточно ⚡! Нужно: ${cost}`);
+            }
         }
+        
+        // ========== МОНЕТИЗАЦИЯ ==========
+        function buyStarsBooster() {
+            if (gameState.stars >= 10) {
+                gameState.stars -= 10;
+                gameState.boostActive = true;
+                gameState.boostEnd = Date.now() + 30 * 60 * 1000; // 30 минут
+                updateUI();
+                alert('Бустер активирован на 30 минут! Доход x10!');
+                
+                // Здесь будет реальная покупка через Telegram Stars API
+                // tg.sendData(JSON.stringify({type: 'buy_booster', id: 'booster_10x'}));
+            } else {
+                alert('Недостаточно Stars! Купите через Telegram.');
+                // Открываем окно покупки Stars
+                if (tg) {
+                    tg.openInvoice({
+                        title: 'Купить 100 Stars',
+                        description: 'Для покупки бустеров и улучшений',
+                        currency: 'XTR',
+                        prices: [{ label: '100 Stars', amount: '100' }]
+                    });
+                }
+            }
+        }
+        
+        // ========== UI ФУНКЦИИ ==========
+        function updateUI() {
+            document.getElementById('energy').textContent = gameState.energy;
+            document.getElementById('stars').textContent = gameState.stars;
+            document.getElementById('crew').textContent = gameState.crew;
+            document.getElementById('clickValue').textContent = `+${gameState.perClick} ⚡`;
+        }
+        
+        function createMineEffect(e) {
+            const asteroid = document.getElementById('asteroid');
+            const rect = asteroid.getBoundingClientRect();
+            
+            const effect = document.createElement('div');
+            effect.className = 'mine-effect';
+            effect.style.left = (e.clientX - rect.left - 10) + 'px';
+            effect.style.top = (e.clientY - rect.top - 10) + 'px';
+            
+            asteroid.appendChild(effect);
+            setTimeout(() => effect.remove(), 500);
+        }
+        
+        function showFloatingText(x, y, text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.style.position = 'fixed';
+            div.style.left = (x - 20) + 'px';
+            div.style.top = (y - 30) + 'px';
+            div.style.color = '#ffcc00';
+            div.style.fontWeight = 'bold';
+            div.style.pointerEvents = 'none';
+            div.style.zIndex = '1000';
+            div.style.transition = 'all 0.5s';
+            div.style.opacity = '1';
+            
+            document.body.appendChild(div);
+            
+            setTimeout(() => {
+                div.style.opacity = '0';
+                div.style.top = (y - 100) + 'px';
+            }, 100);
+            
+            setTimeout(() => div.remove(), 600);
+        }
+        
+        function openUpgrades() {
+            document.getElementById('upgradesList').style.display = 
+                document.getElementById('upgradesList').style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function openShop() {
+            document.getElementById('starsShop').style.display = 
+                document.getElementById('starsShop').style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function useBoost() {
+            buyStarsBooster();
+        }
+        
+        function openBattle() {
+            alert('Турнирный режим откроется в следующем обновлении!');
+        }
+        
+        // ========== СОХРАНЕНИЕ ==========
+        function saveGame() {
+            localStorage.setItem('starMinerSave', JSON.stringify(gameState));
+        }
+        
+        function loadGame() {
+            const save = localStorage.getItem('starMinerSave');
+            if (save) {
+                gameState = JSON.parse(save);
+                updateUI();
+            }
+        }
+        
+        // Автосохранение каждые 30 сек
+        setInterval(saveGame, 30000);
+        
+        // Загрузка при старте
+        window.addEventListener('load', () => {
+            loadGame();
+            updateUI();
+            
+            // Имитация получения Stars (в реальности из Telegram)
+            setTimeout(() => {
+                gameState.stars = 20;
+                updateUI();
+                alert('🎉 Добро пожаловать! Вам начислено 20 Stars для тестирования!');
+            }, 1000);
+        });
     </script>
 </body>
 </html>
