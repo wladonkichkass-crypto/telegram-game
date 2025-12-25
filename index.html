@@ -3,577 +3,1676 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Courier</title>
+    <title>NEON HIGHWAY - Реалистичные гонки</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: #000; 
-            color: #0ff; 
-            font-family: Arial, sans-serif; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #000;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
             overflow: hidden;
             width: 100vw;
             height: 100vh;
+            position: fixed;
         }
-        
-        #gameContainer {
-            position: relative;
+
+        #renderCanvas {
             width: 100%;
             height: 100%;
-        }
-        
-        #gameCanvas {
             display: block;
-            background: #111;
+            outline: none;
         }
-        
-        #ui {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            font-size: 20px;
-            text-shadow: 0 0 10px #0ff;
-        }
-        
-        #startScreen {
+
+        /* ИНТЕРФЕЙС */
+        .ui-container {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* ЭКРАН ЗАГРУЗКИ */
+        #loadingScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #0ff;
-            text-align: center;
-            z-index: 100;
+            z-index: 200;
         }
-        
-        h1 {
-            font-size: 40px;
-            margin-bottom: 20px;
-            color: #f0f;
-            text-shadow: 0 0 20px #f0f;
+
+        .loading-bar {
+            width: 300px;
+            height: 4px;
+            background: #333;
+            margin-top: 20px;
+            border-radius: 2px;
+            overflow: hidden;
         }
-        
-        button {
-            background: #00aaff;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 20px;
-            border-radius: 10px;
-            margin: 10px;
-            cursor: pointer;
-            transition: transform 0.2s;
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #0088ff);
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 2px;
         }
-        
-        button:active {
-            transform: scale(0.95);
-        }
-        
-        #controls {
-            position: absolute;
-            bottom: 30px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 50px;
-        }
-        
-        .controlBtn {
-            width: 80px;
-            height: 80px;
-            background: rgba(0,255,255,0.3);
-            border: 3px solid #0ff;
-            border-radius: 50%;
-            color: white;
-            font-size: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        #gameOver {
+
+        /* ГЛАВНОЕ МЕНЮ */
+        #mainMenu {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: white;
+            z-index: 150;
+        }
+
+        .game-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #00ff88, #0088ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
             text-align: center;
         }
+
+        .menu-button {
+            pointer-events: auto;
+            width: 300px;
+            padding: 20px 40px;
+            margin: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .menu-button:active {
+            transform: translateY(0);
+        }
+
+        .menu-button.primary {
+            background: linear-gradient(45deg, #00ff88, #0088ff);
+            border: none;
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        /* ИГРОВОЙ ИНТЕРФЕЙС */
+        #gameUI {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 30px;
+            display: none;
+        }
+
+        .stats-panel {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            width: 300px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .stat-label {
+            color: #aaa;
+        }
+
+        .stat-value {
+            color: white;
+            font-weight: 600;
+        }
+
+        /* УПРАВЛЕНИЕ */
+        .controls {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 30px;
+        }
+
+        .control-button {
+            pointer-events: auto;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-button:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.9);
+        }
+
+        .control-button.nitro {
+            background: linear-gradient(45deg, #ff3366, #ff0066);
+            border: none;
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.5);
+        }
+
+        /* ПОБЕДА */
+        #victoryScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0, 40, 80, 0.95) 0%, rgba(0, 0, 0, 0.98) 100%);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 180;
+            backdrop-filter: blur(20px);
+        }
+
+        .victory-title {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* АНИМАЦИИ */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* АДАПТИВНОСТЬ */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2.5rem;
+            }
+            
+            .menu-button {
+                width: 250px;
+                padding: 15px 30px;
+                font-size: 1.1rem;
+            }
+            
+            .control-button {
+                width: 70px;
+                height: 70px;
+                font-size: 1.5rem;
+            }
+            
+            .stats-panel {
+                width: 250px;
+                padding: 15px;
+            }
+        }
     </style>
+    <!-- Babylon.js библиотеки -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://cdn.babylonjs.com/proceduralTextures/babylon.proceduralTextures.min.js"></script>
 </head>
 <body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas"></canvas>
-        
-        <div id="ui">
-            <div>Дистанция: <span id="distance">0</span>m</div>
-            <div>Данные: <span id="data">0</span> GB</div>
-            <div>Скорость: <span id="speed">x1.0</span></div>
-            <div>Жизни: <span id="lives">3</span></div>
+    <!-- Холст для Babylon.js -->
+    <canvas id="renderCanvas"></canvas>
+    
+    <!-- ИНТЕРФЕЙС -->
+    <div class="ui-container">
+        <!-- ЗАГРУЗКА -->
+        <div id="loadingScreen">
+            <h1 style="color: #00ff88; font-size: 2.5rem; margin-bottom: 20px;">NEON HIGHWAY</h1>
+            <p style="color: #aaa; margin-bottom: 30px;">Загрузка мира...</p>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+            <p id="loadingText" style="color: #888; margin-top: 10px;">Инициализация...</p>
         </div>
         
-        <div id="startScreen">
-            <h1>🚀 CYBER COURIER</h1>
-            <p>Доставляй данные в киберпространстве</p>
-            <p style="color: #ff0; margin: 20px;">Тап/Пробел - Прыжок | Удержание - Слайд</p>
-            <button onclick="startGame()">СТАРТ</button>
-            <p id="highScore" style="margin-top: 20px; color: #0f0;"></p>
+        <!-- ГЛАВНОЕ МЕНЮ -->
+        <div id="mainMenu">
+            <h1 class="game-title">NEON HIGHWAY</h1>
+            <p style="color: #aaa; margin-bottom: 40px; text-align: center;">Реалистичные гонки в мире будущего</p>
+            
+            <button class="menu-button primary" onclick="startGame()">БЫСТРАЯ ГОНКА</button>
+            <button class="menu-button" onclick="showCareer()">КАРЬЕРА</button>
+            <button class="menu-button" onclick="showGarage()">ГАРАЖ</button>
+            <button class="menu-button" onclick="showMultiplayer()">МУЛЬТИПЛЕЕР</button>
+            
+            <div id="playerInfo" style="margin-top: 50px; text-align: center;">
+                <!-- Данные игрока -->
+            </div>
         </div>
         
-        <div id="controls" style="display: none;">
-            <div class="controlBtn" ontouchstart="jump()" ontouchend="stopJump()">↑</div>
-            <div class="controlBtn" ontouchstart="slide()" ontouchend="stopSlide()">↓</div>
+        <!-- ИГРОВОЙ ИНТЕРФЕЙС -->
+        <div id="gameUI">
+            <div class="stats-panel">
+                <div class="stat-row">
+                    <span class="stat-label">Скорость</span>
+                    <span class="stat-value" id="speedValue">0 км/ч</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Обороты</span>
+                    <span class="stat-value" id="rpmValue">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Передача</span>
+                    <span class="stat-value" id="gearValue">N</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Дистанция</span>
+                    <span class="stat-value" id="distanceValue">0 м</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Время</span>
+                    <span class="stat-value" id="timeValue">0:00</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Нитро</span>
+                    <span class="stat-value" id="nitroValue">100%</span>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <div class="control-button" id="leftButton">←</div>
+                    <div class="control-button" id="rightButton">→</div>
+                </div>
+                <div class="control-group">
+                    <div class="control-button nitro" id="nitroButton">⚡</div>
+                    <div class="control-button" id="brakeButton">⏹</div>
+                </div>
+            </div>
         </div>
         
-        <div id="gameOver">
-            <h1 style="color: #f00;">ИГРА ОКОНЧЕНА</h1>
-            <p>Дистанция: <span id="finalDistance">0</span>m</p>
-            <p>Собрано данных: <span id="finalData">0</span> GB</p>
-            <p style="color: #ff0; margin: 20px;" id="newRecord"></p>
-            <button onclick="restartGame()">ИГРАТЬ СНОВА</button>
+        <!-- ПОБЕДА -->
+        <div id="victoryScreen">
+            <h1 class="victory-title">ФИНИШ!</h1>
+            <div style="background: rgba(0,0,0,0.8); padding: 30px; border-radius: 20px; min-width: 300px; text-align: center;">
+                <div class="stat-row" style="margin: 15px 0;">
+                    <span class="stat-label">Время заезда:</span>
+                    <span class="stat-value" id="finalTime">0:00</span>
+                </div>
+                <div class="stat-row" style="margin: 15px 0;">
+                    <span class="stat-label">Макс. скорость:</span>
+                    <span class="stat-value" id="finalSpeed">0 км/ч</span>
+                </div>
+                <div class="stat-row" style="margin: 15px 0;">
+                    <span class="stat-label">Средняя скорость:</span>
+                    <span class="stat-value" id="avgSpeed">0 км/ч</span>
+                </div>
+                <div class="stat-row" style="margin: 15px 0; font-size: 1.3rem; color: #00ff88;">
+                    <span>Заработано очков:</span>
+                    <span id="finalScore">0</span>
+                </div>
+            </div>
+            
+            <button class="menu-button primary" onclick="restartRace()" style="margin-top: 30px;">ГОНЯТЬ СНОВА</button>
+            <button class="menu-button" onclick="backToMenu()" style="margin-top: 15px;">В МЕНЮ</button>
         </div>
     </div>
 
     <script>
-        // ========== НАСТРОЙКИ ИГРЫ ==========
-        const config = {
-            playerSpeed: 5,
-            jumpForce: -15,
-            gravity: 0.8,
-            groundY: 0,
-            obstacleSpeed: 6,
-            gameSpeed: 1,
-            minGap: 150,
-            maxGap: 300
+        // ========== КОНФИГУРАЦИЯ ==========
+        const CONFIG = {
+            ROAD_LENGTH: 5000,
+            ROAD_WIDTH: 50,
+            PLAYER: {
+                ACCELERATION: 2,
+                MAX_SPEED: 300,
+                TURN_SPEED: 0.05,
+                BRAKE_FORCE: 4,
+                NITRO_BOOST: 3,
+                NITRO_DRAIN: 30,
+                NITRO_RECHARGE: 10
+            },
+            TRAFFIC: {
+                CAR_COUNT: 15,
+                MIN_SPEED: 40,
+                MAX_SPEED: 100
+            },
+            ENVIRONMENT: {
+                BUILDING_COUNT: 100,
+                LAMP_POST_COUNT: 80
+            }
         };
 
         // ========== ПЕРЕМЕННЫЕ ИГРЫ ==========
-        let canvas, ctx;
-        let player = { x: 100, y: 0, width: 50, height: 80, velY: 0, isJumping: false, isSliding: false };
-        let obstacles = [];
-        let dataItems = [];
-        let score = 0;
-        let distance = 0;
-        let dataCollected = 0;
-        let lives = 3;
-        let gameRunning = false;
-        let gameSpeed = 1;
-        let lastObstacleTime = 0;
-        let animationId;
-        let highScore = localStorage.getItem('cyberHighScore') || 0;
-
-        // ========== ИНИЦИАЛИЗАЦИЯ ==========
-        window.onload = function() {
-            canvas = document.getElementById('gameCanvas');
-            ctx = canvas.getContext('2d');
-            
-            // Устанавливаем размер canvas
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-            
-            // Показываем рекорд
-            if (highScore > 0) {
-                document.getElementById('highScore').textContent = `🏆 Рекорд: ${highScore}m`;
-            }
-            
-            // Клавиатура для ПК
-            document.addEventListener('keydown', (e) => {
-                if (e.code === 'Space' && gameRunning) {
-                    jump();
-                }
-                if (e.code === 'ArrowDown' && gameRunning) {
-                    slide();
-                }
-            });
-            
-            document.addEventListener('keyup', (e) => {
-                if (e.code === 'ArrowDown' && gameRunning) {
-                    stopSlide();
-                }
-            });
+        let engine, scene, camera;
+        let playerCar, road;
+        let trafficCars = [];
+        let environment = [];
+        let lights = [];
+        let particles = [];
+        let gameState = {
+            isPlaying: false,
+            speed: 0,
+            maxSpeed: 0,
+            distance: 0,
+            time: 0,
+            gear: 0,
+            rpm: 0,
+            nitro: 100,
+            score: 0,
+            totalScore: 0
         };
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            config.groundY = canvas.height - 100;
-            player.y = config.groundY - player.height;
+        let input = {
+            left: false,
+            right: false,
+            nitro: false,
+            brake: false
+        };
+
+        // ========== ИНИЦИАЛИЗАЦИЯ BABYLON.JS ==========
+        async function initGame() {
+            // Создаем Babylon.js движок
+            const canvas = document.getElementById('renderCanvas');
+            engine = new BABYLON.Engine(canvas, true, {
+                preserveDrawingBuffer: true,
+                stencil: true,
+                disableWebGL2Support: false
+            });
+
+            // Создаем сцену
+            scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+            scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
+            scene.fogDensity = 0.05;
+            scene.fogColor = new BABYLON.Color3(0, 0.1, 0.2);
+
+            // Настраиваем камеру
+            setupCamera();
+            
+            // Настраиваем освещение
+            setupLighting();
+            
+            // Создаем окружение
+            await createEnvironment();
+            
+            // Создаем дорогу
+            createRoad();
+            
+            // Создаем машину игрока
+            await createPlayerCar();
+            
+            // Создаем трафик
+            createTraffic();
+            
+            // Настраиваем физику
+            setupPhysics();
+            
+            // Настраиваем обработчики
+            setupEventHandlers();
+            
+            // Запускаем рендеринг
+            engine.runRenderLoop(() => {
+                if (scene && scene.activeCamera) {
+                    scene.render();
+                }
+            });
+
+            // Обработка ресайза
+            window.addEventListener('resize', () => {
+                engine.resize();
+            });
+            
+            updateLoading(100);
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('mainMenu').style.display = 'flex';
+            }, 500);
         }
 
-        // ========== ЗАПУСК ИГРЫ ==========
-        function startGame() {
-            document.getElementById('startScreen').style.display = 'none';
-            document.getElementById('controls').style.display = 'flex';
+        function setupCamera() {
+            // Камера от третьего лица
+            camera = new BABYLON.ArcRotateCamera(
+                "camera",
+                -Math.PI / 2,
+                Math.PI / 4,
+                50,
+                new BABYLON.Vector3(0, 5, 0),
+                scene
+            );
             
-            // Сброс игры
-            player = { x: 100, y: config.groundY - 80, width: 50, height: 80, velY: 0, isJumping: false, isSliding: false };
-            obstacles = [];
-            dataItems = [];
-            score = 0;
-            distance = 0;
-            dataCollected = 0;
-            lives = 3;
-            gameSpeed = 1;
-            gameRunning = true;
+            camera.lowerBetaLimit = 0.1;
+            camera.upperBetaLimit = Math.PI / 2.5;
+            camera.lowerRadiusLimit = 15;
+            camera.upperRadiusLimit = 50;
+            camera.radius = 30;
+            camera.wheelPrecision = 100;
+            camera.attachControl(engine.getRenderingCanvas(), false);
             
-            updateUI();
-            gameLoop();
+            // Сглаживание движения камеры
+            camera.inertia = 0.8;
         }
 
-        // ========== ИГРОВОЙ ЦИКЛ ==========
-        function gameLoop() {
-            if (!gameRunning) return;
+        function setupLighting() {
+            // Основной свет
+            const mainLight = new BABYLON.HemisphericLight(
+                "mainLight",
+                new BABYLON.Vector3(0, 1, 0),
+                scene
+            );
+            mainLight.intensity = 0.5;
+            mainLight.groundColor = new BABYLON.Color3(0.1, 0.1, 0.2);
+            mainLight.diffuse = new BABYLON.Color3(0.8, 0.8, 0.9);
             
-            // Очистка экрана
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Направленный свет (солнце)
+            const sunLight = new BABYLON.DirectionalLight(
+                "sunLight",
+                new BABYLON.Vector3(-1, -2, -1),
+                scene
+            );
+            sunLight.intensity = 0.8;
+            sunLight.position = new BABYLON.Vector3(0, 50, 0);
+            sunLight.shadowMinZ = 1;
+            sunLight.shadowMaxZ = 250;
             
-            // Рисуем фон
-            drawBackground();
+            // Включение теней
+            sunLight.shadowEnabled = true;
+            const shadowGenerator = new BABYLON.ShadowGenerator(2048, sunLight);
+            shadowGenerator.useExponentialShadowMap = true;
             
-            // Обновляем и рисуем игрока
-            updatePlayer();
-            drawPlayer();
-            
-            // Обновляем и рисуем препятствия
-            updateObstacles();
-            drawObstacles();
-            
-            // Обновляем и рисуем данные
-            updateData();
-            drawData();
-            
-            // Проверяем столкновения
-            checkCollisions();
-            
-            // Увеличиваем дистанцию
-            distance += gameSpeed;
-            if (distance % 1000 === 0) {
-                gameSpeed += 0.1;
+            // Неоновые огни
+            for (let i = 0; i < 10; i++) {
+                const light = new BABYLON.PointLight(
+                    `neonLight${i}`,
+                    new BABYLON.Vector3(
+                        Math.random() * 100 - 50,
+                        10,
+                        -Math.random() * 200
+                    ),
+                    scene
+                );
+                light.diffuse = new BABYLON.Color3(
+                    Math.random() * 0.5 + 0.5,
+                    Math.random() * 0.5,
+                    Math.random() * 0.5 + 0.5
+                );
+                light.intensity = 2;
+                light.range = 50;
+                lights.push(light);
             }
-            
-            // Обновляем UI
-            updateUI();
-            
-            // Спавн объектов
-            spawnObjects();
-            
-            // Следующий кадр
-            animationId = requestAnimationFrame(gameLoop);
         }
 
-        function drawBackground() {
-            // Дорога
-            ctx.fillStyle = '#333';
-            ctx.fillRect(0, config.groundY, canvas.width, 100);
+        async function createEnvironment() {
+            updateLoading(20, "Создание ландшафта...");
             
-            // Разделительная полоса
-            ctx.strokeStyle = '#ff0';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([20, 20]);
-            ctx.beginPath();
-            ctx.moveTo(0, config.groundY + 50);
-            ctx.lineTo(canvas.width, config.groundY + 50);
-            ctx.stroke();
-            ctx.setLineDash([]);
+            // Террейн (местность)
+            const ground = BABYLON.MeshBuilder.CreateGround(
+                "ground",
+                { width: 2000, height: 2000 },
+                scene
+            );
             
-            // Здания на заднем плане
-            ctx.fillStyle = '#222';
-            for (let i = 0; i < 5; i++) {
-                const x = (i * 200 + (distance * 0.5)) % (canvas.width + 200) - 100;
-                const height = 100 + Math.sin(i) * 50;
-                ctx.fillRect(x, config.groundY - height, 80, height);
+            const groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
+            groundMaterial.diffuseColor = new BABYLON.Color3(0.1, 0.15, 0.2);
+            groundMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+            ground.material = groundMaterial;
+            
+            // Небо
+            const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 2000 }, scene);
+            const skyboxMaterial = new BABYLON.StandardMaterial("skyBoxMaterial", scene);
+            skyboxMaterial.backFaceCulling = false;
+            skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+            skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+            skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(
+                "https://assets.babylonjs.com/textures/TropicalSunnyDay",
+                scene
+            );
+            skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+            skyboxMaterial.disableLighting = true;
+            skybox.material = skyboxMaterial;
+            
+            updateLoading(40, "Строим город...");
+            
+            // Здания
+            const buildingMaterials = [
+                createBuildingMaterial(0.3, 0.3, 0.4), // Темно-синий
+                createBuildingMaterial(0.2, 0.2, 0.3), // Синий
+                createBuildingMaterial(0.4, 0.2, 0.3), // Пурпурный
+                createBuildingMaterial(0.3, 0.2, 0.4)  // Фиолетовый
+            ];
+            
+            for (let i = 0; i < CONFIG.ENVIRONMENT.BUILDING_COUNT; i++) {
+                const width = 20 + Math.random() * 40;
+                const depth = 20 + Math.random() * 40;
+                const height = 30 + Math.random() * 100;
+                
+                const building = BABYLON.MeshBuilder.CreateBox(
+                    `building${i}`,
+                    { width, height, depth },
+                    scene
+                );
+                
+                const material = buildingMaterials[Math.floor(Math.random() * buildingMaterials.length)];
+                building.material = material;
+                
+                building.position = new BABYLON.Vector3(
+                    (Math.random() - 0.5) * 800,
+                    height / 2,
+                    -Math.random() * 3000
+                );
                 
                 // Окна
-                ctx.fillStyle = '#ff0';
-                for (let j = 0; j < 4; j++) {
-                    for (let k = 0; k < 3; k++) {
-                        if (Math.random() > 0.5) {
-                            ctx.fillRect(x + 10 + j * 20, config.groundY - height + 10 + k * 30, 10, 20);
+                if (Math.random() > 0.3) {
+                    const windowCount = Math.floor(width * height / 100);
+                    for (let w = 0; w < windowCount; w++) {
+                        if (Math.random() > 0.7) {
+                            const window = BABYLON.MeshBuilder.CreateBox(
+                                `window${i}_${w}`,
+                                { width: 2, height: 3, depth: 0.2 },
+                                scene
+                            );
+                            
+                            const windowMaterial = new BABYLON.StandardMaterial(`windowMat${i}_${w}`, scene);
+                            windowMaterial.emissiveColor = new BABYLON.Color3(
+                                Math.random() * 0.5 + 0.5,
+                                Math.random() * 0.5 + 0.5,
+                                Math.random() * 0.2
+                            );
+                            windowMaterial.diffuseColor = windowMaterial.emissiveColor;
+                            window.material = windowMaterial;
+                            
+                            window.position = new BABYLON.Vector3(
+                                (Math.random() - 0.5) * (width - 4),
+                                (Math.random() - 0.5) * (height - 6),
+                                depth / 2 + 0.1
+                            );
+                            
+                            window.parent = building;
                         }
                     }
                 }
-                ctx.fillStyle = '#222';
+                
+                environment.push(building);
             }
             
-            // Неоновые вывески
-            ctx.fillStyle = '#f0f';
-            ctx.font = '20px Arial';
-            ctx.fillText('DATA', 300 + Math.sin(distance * 0.01) * 50, 100);
-            ctx.fillText('CYBER', 500 + Math.cos(distance * 0.01) * 50, 150);
+            updateLoading(60, "Добавляем освещение...");
+            
+            // Фонарные столбы
+            for (let i = 0; i < CONFIG.ENVIRONMENT.LAMP_POST_COUNT; i++) {
+                const lampGroup = new BABYLON.TransformNode(`lampGroup${i}`);
+                
+                // Столб
+                const pole = BABYLON.MeshBuilder.CreateCylinder(
+                    `pole${i}`,
+                    { height: 10, diameter: 0.3 },
+                    scene
+                );
+                pole.material = createMetalMaterial();
+                pole.position.y = 5;
+                pole.parent = lampGroup;
+                
+                // Фонарь
+                const lamp = BABYLON.MeshBuilder.CreateSphere(
+                    `lamp${i}`,
+                    { diameter: 1.5 },
+                    scene
+                );
+                const lampMaterial = new BABYLON.StandardMaterial(`lampMat${i}`, scene);
+                lampMaterial.emissiveColor = new BABYLON.Color3(1, 1, 0.8);
+                lampMaterial.diffuseColor = new BABYLON.Color3(1, 1, 0.8);
+                lamp.material = lampMaterial;
+                lamp.position = new BABYLON.Vector3(0, 10, 0);
+                lamp.parent = lampGroup;
+                
+                // Свет от фонаря
+                const lampLight = new BABYLON.PointLight(
+                    `lampLight${i}`,
+                    new BABYLON.Vector3(0, 9, 0),
+                    scene
+                );
+                lampLight.diffuse = new BABYLON.Color3(1, 1, 0.8);
+                lampLight.intensity = 1;
+                lampLight.range = 20;
+                lampLight.parent = lampGroup;
+                
+                lampGroup.position = new BABYLON.Vector3(
+                    (Math.random() > 0.5 ? 1 : -1) * (CONFIG.ROAD_WIDTH/2 + 10),
+                    0,
+                    -Math.random() * CONFIG.ROAD_LENGTH
+                );
+                
+                environment.push(lampGroup);
+                lights.push(lampLight);
+            }
+            
+            // Деревья и растительность
+            for (let i = 0; i < 50; i++) {
+                const tree = createTree();
+                tree.position = new BABYLON.Vector3(
+                    (Math.random() > 0.5 ? 1 : -1) * (CONFIG.ROAD_WIDTH/2 + 30 + Math.random() * 50),
+                    0,
+                    -Math.random() * CONFIG.ROAD_LENGTH
+                );
+                environment.push(tree);
+            }
+            
+            updateLoading(80, "Настраиваем погоду...");
+            
+            // Дождь (частицы)
+            const rainSystem = new BABYLON.ParticleSystem("rain", 5000, scene);
+            rainSystem.particleTexture = new BABYLON.Texture("https://assets.babylonjs.com/textures/flare.png", scene);
+            rainSystem.emitter = new BABYLON.Vector3(0, 100, 0);
+            rainSystem.minEmitBox = new BABYLON.Vector3(-500, 0, -500);
+            rainSystem.maxEmitBox = new BABYLON.Vector3(500, 0, 500);
+            rainSystem.color1 = new BABYLON.Color4(0.8, 0.8, 1, 0.5);
+            rainSystem.color2 = new BABYLON.Color4(0.8, 0.8, 1, 0.3);
+            rainSystem.colorDead = new BABYLON.Color4(0.8, 0.8, 1, 0);
+            rainSystem.minSize = 0.1;
+            rainSystem.maxSize = 0.3;
+            rainSystem.minLifeTime = 1;
+            rainSystem.maxLifeTime = 2;
+            rainSystem.emitRate = 1000;
+            rainSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+            rainSystem.gravity = new BABYLON.Vector3(0, -50, 0);
+            rainSystem.direction1 = new BABYLON.Vector3(-1, -10, -1);
+            rainSystem.direction2 = new BABYLON.Vector3(1, -10, 1);
+            rainSystem.minAngularSpeed = 0;
+            rainSystem.maxAngularSpeed = Math.PI;
+            rainSystem.start();
         }
 
-        function updatePlayer() {
-            // Гравитация
-            player.velY += config.gravity;
-            player.y += player.velY;
+        function createBuildingMaterial(r, g, b) {
+            const material = new BABYLON.StandardMaterial("buildingMat", scene);
+            material.diffuseColor = new BABYLON.Color3(r, g, b);
+            material.specularColor = new BABYLON.Color3(r * 0.5, g * 0.5, b * 0.5);
+            material.specularPower = 64;
             
-            // Ограничение на земле
-            if (player.y > config.groundY - (player.isSliding ? player.height/2 : player.height)) {
-                player.y = config.groundY - (player.isSliding ? player.height/2 : player.height);
-                player.velY = 0;
-                player.isJumping = false;
-            }
+            // Нормальная карта для текстуры
+            material.bumpTexture = new BABYLON.Texture("https://assets.babylonjs.com/textures/normalMap.jpg", scene);
+            material.bumpTexture.level = 0.1;
             
-            // Слайд уменьшает высоту
-            if (player.isSliding) {
-                player.height = 40;
-            } else {
-                player.height = 80;
-            }
+            return material;
         }
 
-        function drawPlayer() {
-            // Корпус
-            ctx.fillStyle = player.isSliding ? '#0af' : '#0ff';
-            ctx.fillRect(player.x, player.y, player.width, player.height);
+        function createMetalMaterial() {
+            const material = new BABYLON.StandardMaterial("metalMat", scene);
+            material.diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.35);
+            material.specularColor = new BABYLON.Color3(0.8, 0.8, 0.9);
+            material.specularPower = 128;
+            material.metallic = 0.8;
+            material.roughness = 0.2;
+            return material;
+        }
+
+        function createTree() {
+            const treeGroup = new BABYLON.TransformNode("tree");
+            
+            // Ствол
+            const trunk = BABYLON.MeshBuilder.CreateCylinder(
+                "trunk",
+                { height: 5, diameter: 0.8 },
+                scene
+            );
+            const trunkMaterial = new BABYLON.StandardMaterial("trunkMat", scene);
+            trunkMaterial.diffuseColor = new BABYLON.Color3(0.4, 0.3, 0.2);
+            trunk.material = trunkMaterial;
+            trunk.position.y = 2.5;
+            trunk.parent = treeGroup;
+            
+            // Крона
+            const crown = BABYLON.MeshBuilder.CreateSphere(
+                "crown",
+                { diameter: 6, segments: 8 },
+                scene
+            );
+            const crownMaterial = new BABYLON.StandardMaterial("crownMat", scene);
+            crownMaterial.diffuseColor = new BABYLON.Color3(0.2, 0.4, 0.2);
+            crown.material = crownMaterial;
+            crown.position.y = 7;
+            crown.parent = treeGroup;
+            
+            return treeGroup;
+        }
+
+        function createRoad() {
+            updateLoading(85, "Создание дороги...");
+            
+            // Дорожное полотно
+            road = BABYLON.MeshBuilder.CreateGround(
+                "road",
+                {
+                    width: CONFIG.ROAD_WIDTH,
+                    height: CONFIG.ROAD_LENGTH,
+                    subdivisions: 100
+                },
+                scene
+            );
+            
+            // Материал дороги
+            const roadMaterial = new BABYLON.PBRMaterial("roadMaterial", scene);
+            roadMaterial.albedoColor = new BABYLON.Color3(0.2, 0.2, 0.25);
+            roadMaterial.metallic = 0;
+            roadMaterial.roughness = 0.9;
+            
+            // Текстурная карта для асфальта
+            roadMaterial.albedoTexture = new BABYLON.Texture(
+                "https://assets.babylonjs.com/textures/road.jpg",
+                scene
+            );
+            roadMaterial.albedoTexture.uScale = 50;
+            roadMaterial.albedoTexture.vScale = CONFIG.ROAD_LENGTH / 10;
+            
+            // Нормальная карта для рельефа
+            roadMaterial.bumpTexture = new BABYLON.Texture(
+                "https://assets.babylonjs.com/textures/road_normal.jpg",
+                scene
+            );
+            roadMaterial.bumpTexture.uScale = 50;
+            roadMaterial.bumpTexture.vScale = CONFIG.ROAD_LENGTH / 10;
+            roadMaterial.invertNormalMapX = true;
+            roadMaterial.invertNormalMapY = true;
+            roadMaterial.useParallax = true;
+            roadMaterial.useParallaxOcclusion = true;
+            roadMaterial.parallaxScaleBias = 0.05;
+            
+            road.material = roadMaterial;
+            road.position.y = 0.01;
+            
+            // Разметка
+            createRoadMarkings();
+        }
+
+        function createRoadMarkings() {
+            const markingsMaterial = new BABYLON.StandardMaterial("markingsMat", scene);
+            markingsMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
+            markingsMaterial.emissiveColor = new BABYLON.Color3(0.8, 0.8, 0);
+            markingsMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+            
+            // Центральная разделительная линия
+            for (let i = 0; i < CONFIG.ROAD_LENGTH / 10; i++) {
+                const line = BABYLON.MeshBuilder.CreateBox(
+                    `centerLine${i}`,
+                    { width: 0.5, height: 0.02, depth: 3 },
+                    scene
+                );
+                line.material = markingsMaterial;
+                line.position = new BABYLON.Vector3(
+                    0,
+                    0.02,
+                    -i * 10 - 5
+                );
+            }
+            
+            // Боковые линии
+            const sideLineMaterial = markingsMaterial.clone("sideLineMat");
+            sideLineMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
+            
+            const leftLine = BABYLON.MeshBuilder.CreateBox(
+                "leftLine",
+                { width: 0.3, height: 0.02, depth: CONFIG.ROAD_LENGTH },
+                scene
+            );
+            leftLine.material = sideLineMaterial;
+            leftLine.position = new BABYLON.Vector3(
+                -CONFIG.ROAD_WIDTH / 2,
+                0.02,
+                -CONFIG.ROAD_LENGTH / 2
+            );
+            
+            const rightLine = BABYLON.MeshBuilder.CreateBox(
+                "rightLine",
+                { width: 0.3, height: 0.02, depth: CONFIG.ROAD_LENGTH },
+                scene
+            );
+            rightLine.material = sideLineMaterial;
+            rightLine.position = new BABYLON.Vector3(
+                CONFIG.ROAD_WIDTH / 2,
+                0.02,
+                -CONFIG.ROAD_LENGTH / 2
+            );
+        }
+
+        async function createPlayerCar() {
+            updateLoading(90, "Создание автомобиля...");
+            
+            // Создаем группу для машины
+            playerCar = new BABYLON.TransformNode("playerCar");
+            
+            // Кузов (основная часть)
+            const body = BABYLON.MeshBuilder.CreateBox(
+                "carBody",
+                { width: 2, height: 0.8, depth: 4 },
+                scene
+            );
+            
+            const carMaterial = new BABYLON.PBRMaterial("carMaterial", scene);
+            carMaterial.albedoColor = new BABYLON.Color3(0.1, 0.6, 1); // Синий цвет
+            carMaterial.metallic = 0.9;
+            carMaterial.roughness = 0.2;
+            carMaterial.reflectivityColor = new BABYLON.Color3(0.8, 0.8, 0.9);
+            carMaterial.microSurface = 0.9;
+            
+            // Кубическая карта отражений
+            const reflectionTexture = new BABYLON.CubeTexture(
+                "https://assets.babylonjs.com/textures/TropicalSunnyDay",
+                scene
+            );
+            carMaterial.reflectionTexture = reflectionTexture;
+            carMaterial.reflectionTexture.level = 0.5;
+            
+            body.material = carMaterial;
+            body.parent = playerCar;
             
             // Кабина
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(player.x + 15, player.y + 10, 20, 20);
+            const cabin = BABYLON.MeshBuilder.CreateBox(
+                "cabin",
+                { width: 1.8, height: 0.6, depth: 1.5 },
+                scene
+            );
+            const cabinMaterial = new BABYLON.StandardMaterial("cabinMat", scene);
+            cabinMaterial.diffuseColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+            cabinMaterial.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+            cabinMaterial.alpha = 0.7;
+            cabin.material = cabinMaterial;
+            cabin.position = new BABYLON.Vector3(0, 0.7, -0.5);
+            cabin.parent = playerCar;
             
-            // Глаза
-            ctx.fillStyle = '#f0f';
-            ctx.fillRect(player.x + 20, player.y + 15, 5, 5);
-            ctx.fillRect(player.x + 35, player.y + 15, 5, 5);
+            // Колеса
+            const wheelMaterial = new BABYLON.PBRMaterial("wheelMat", scene);
+            wheelMaterial.albedoColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+            wheelMaterial.metallic = 0.8;
+            wheelMaterial.roughness = 0.3;
             
-            // Ноги
-            ctx.fillStyle = '#ff0';
-            ctx.fillRect(player.x + 10, player.y + player.height - 10, 10, 10);
-            ctx.fillRect(player.x + 30, player.y + player.height - 10, 10, 10);
+            const wheelPositions = [
+                new BABYLON.Vector3(-1.1, -0.4, 1.5),  // Переднее левое
+                new BABYLON.Vector3(1.1, -0.4, 1.5),   // Переднее правое
+                new BABYLON.Vector3(-1.1, -0.4, -1.5), // Заднее левое
+                new BABYLON.Vector3(1.1, -0.4, -1.5)   // Заднее правое
+            ];
             
-            // Эффект скорости
-            if (gameSpeed > 1.5) {
-                ctx.fillStyle = `rgba(255, 100, 100, ${0.3 + Math.sin(Date.now() * 0.01) * 0.2})`;
-                ctx.fillRect(player.x - 20, player.y + 10, 20, player.height - 20);
-            }
-        }
-
-        function spawnObjects() {
-            const now = Date.now();
-            
-            // Препятствия
-            if (now - lastObstacleTime > config.minGap + Math.random() * config.maxGap) {
-                obstacles.push({
-                    x: canvas.width,
-                    y: config.groundY - 60,
-                    width: 40,
-                    height: 60,
-                    type: Math.random() > 0.7 ? 'high' : 'low'
-                });
-                lastObstacleTime = now;
-            }
-            
-            // Данные
-            if (Math.random() < 0.02) {
-                dataItems.push({
-                    x: canvas.width,
-                    y: Math.random() * (config.groundY - 100) + 50,
-                    width: 20,
-                    height: 20,
-                    collected: false
-                });
-            }
-        }
-
-        function updateObstacles() {
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                obstacles[i].x -= config.obstacleSpeed * gameSpeed;
+            wheelPositions.forEach((pos, index) => {
+                const wheel = BABYLON.MeshBuilder.CreateCylinder(
+                    `wheel${index}`,
+                    { height: 0.3, diameter: 1.2, tessellation: 24 },
+                    scene
+                );
+                wheel.rotation.x = Math.PI / 2;
+                wheel.material = wheelMaterial;
+                wheel.position = pos;
+                wheel.parent = playerCar;
                 
-                if (obstacles[i].x < -50) {
-                    obstacles.splice(i, 1);
-                    score += 10;
+                // Диски колес
+                const rim = BABYLON.MeshBuilder.CreateCylinder(
+                    `rim${index}`,
+                    { height: 0.32, diameter: 0.7, tessellation: 16 },
+                    scene
+                );
+                rim.rotation.x = Math.PI / 2;
+                const rimMaterial = wheelMaterial.clone("rimMat");
+                rimMaterial.albedoColor = new BABYLON.Color3(0.7, 0.7, 0.8);
+                rim.material = rimMaterial;
+                rim.position = pos;
+                rim.parent = playerCar;
+            });
+            
+            // Передние фары
+            const headlightMaterial = new BABYLON.StandardMaterial("headlightMat", scene);
+            headlightMaterial.emissiveColor = new BABYLON.Color3(1, 1, 0.9);
+            headlightMaterial.diffuseColor = new BABYLON.Color3(1, 1, 0.9);
+            
+            const leftHeadlight = BABYLON.MeshBuilder.CreateSphere(
+                "leftHeadlight",
+                { diameter: 0.3 },
+                scene
+            );
+            leftHeadlight.material = headlightMaterial;
+            leftHeadlight.position = new BABYLON.Vector3(-0.7, 0.2, 2);
+            leftHeadlight.parent = playerCar;
+            
+            const rightHeadlight = leftHeadlight.clone("rightHeadlight");
+            rightHeadlight.position.x = 0.7;
+            rightHeadlight.parent = playerCar;
+            
+            // Свет от фар
+            const headlightLight = new BABYLON.SpotLight(
+                "headlightLight",
+                new BABYLON.Vector3(0, 0.5, 2),
+                new BABYLON.Vector3(0, -0.2, 1),
+                Math.PI / 4,
+                2,
+                scene
+            );
+            headlightLight.intensity = 3;
+            headlightLight.diffuse = new BABYLON.Color3(1, 1, 0.9);
+            headlightLight.specular = new BABYLON.Color3(1, 1, 0.9);
+            headlightLight.parent = playerCar;
+            
+            // Задние фары
+            const taillightMaterial = new BABYLON.StandardMaterial("taillightMat", scene);
+            taillightMaterial.emissiveColor = new BABYLON.Color3(1, 0.2, 0.1);
+            taillightMaterial.diffuseColor = new BABYLON.Color3(1, 0.2, 0.1);
+            
+            const leftTaillight = BABYLON.MeshBuilder.CreateSphere(
+                "leftTaillight",
+                { diameter: 0.3 },
+                scene
+            );
+            leftTaillight.material = taillightMaterial;
+            leftTaillight.position = new BABYLON.Vector3(-0.7, 0.2, -2);
+            leftTaillight.parent = playerCar;
+            
+            const rightTaillight = leftTaillight.clone("rightTaillight");
+            rightTaillight.position.x = 0.7;
+            rightTaillight.parent = playerCar;
+            
+            // Спиллер
+            const spoiler = BABYLON.MeshBuilder.CreateBox(
+                "spoiler",
+                { width: 2.2, height: 0.1, depth: 0.5 },
+                scene
+            );
+            spoiler.material = carMaterial;
+            spoiler.position = new BABYLON.Vector3(0, 1.2, -1.8);
+            spoiler.parent = playerCar;
+            
+            // Выхлопные трубы
+            const exhaustMaterial = new BABYLON.PBRMaterial("exhaustMat", scene);
+            exhaustMaterial.albedoColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+            exhaustMaterial.metallic = 1;
+            exhaustMaterial.roughness = 0.1;
+            
+            const leftExhaust = BABYLON.MeshBuilder.CreateCylinder(
+                "leftExhaust",
+                { height: 0.5, diameter: 0.2 },
+                scene
+            );
+            leftExhaust.material = exhaustMaterial;
+            leftExhaust.position = new BABYLON.Vector3(-0.5, -0.3, -2);
+            leftExhaust.parent = playerCar;
+            
+            const rightExhaust = leftExhaust.clone("rightExhaust");
+            rightExhaust.position.x = 0.5;
+            rightExhaust.parent = playerCar;
+            
+            playerCar.position = new BABYLON.Vector3(0, 1, 10);
+            playerCar.rotation.y = Math.PI;
+            
+            // Привязываем камеру к машине
+            camera.parent = playerCar;
+            camera.position = new BABYLON.Vector3(0, 8, -15);
+            camera.setTarget(new BABYLON.Vector3(0, 2, 10));
+        }
+
+        function createTraffic() {
+            const carColors = [
+                new BABYLON.Color3(0.9, 0.2, 0.2), // Красный
+                new BABYLON.Color3(0.2, 0.9, 0.2), // Зеленый
+                new BABYLON.Color3(0.2, 0.2, 0.9), // Синий
+                new BABYLON.Color3(0.9, 0.9, 0.2), // Желтый
+                new BABYLON.Color3(0.9, 0.2, 0.9), // Пурпурный
+                new BABYLON.Color3(0.2, 0.9, 0.9)  // Голубой
+            ];
+            
+            for (let i = 0; i < CONFIG.TRAFFIC.CAR_COUNT; i++) {
+                const carGroup = new BABYLON.TransformNode(`trafficCar${i}`);
+                
+                // Кузов
+                const body = BABYLON.MeshBuilder.CreateBox(
+                    `trafficBody${i}`,
+                    { width: 1.8 + Math.random() * 0.4, height: 0.7 + Math.random() * 0.2, depth: 3.5 + Math.random() * 1 },
+                    scene
+                );
+                
+                const carMaterial = new BABYLON.PBRMaterial(`trafficMat${i}`, scene);
+                const color = carColors[Math.floor(Math.random() * carColors.length)];
+                carMaterial.albedoColor = color;
+                carMaterial.metallic = 0.5 + Math.random() * 0.3;
+                carMaterial.roughness = 0.3 + Math.random() * 0.4;
+                
+                body.material = carMaterial;
+                body.parent = carGroup;
+                
+                // Колеса
+                for (let j = 0; j < 4; j++) {
+                    const wheel = BABYLON.MeshBuilder.CreateCylinder(
+                        `trafficWheel${i}_${j}`,
+                        { height: 0.25, diameter: 0.9, tessellation: 16 },
+                        scene
+                    );
+                    wheel.rotation.x = Math.PI / 2;
+                    const wheelMaterial = new BABYLON.PBRMaterial(`trafficWheelMat${i}_${j}`, scene);
+                    wheelMaterial.albedoColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+                    wheelMaterial.metallic = 0.7;
+                    wheel.material = wheelMaterial;
+                    
+                    const wheelX = j % 2 === 0 ? -0.9 : 0.9;
+                    const wheelZ = j < 2 ? 1.3 : -1.3;
+                    wheel.position = new BABYLON.Vector3(wheelX, -0.35, wheelZ);
+                    wheel.parent = carGroup;
                 }
+                
+                // Позиционирование
+                const lane = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+                carGroup.position = new BABYLON.Vector3(
+                    lane * 8,
+                    0.7,
+                    -Math.random() * CONFIG.ROAD_LENGTH * 0.8
+                );
+                
+                carGroup.rotation.y = Math.PI;
+                
+                // Скорость движения
+                carGroup.userData = {
+                    speed: CONFIG.TRAFFIC.MIN_SPEED + Math.random() * (CONFIG.TRAFFIC.MAX_SPEED - CONFIG.TRAFFIC.MIN_SPEED),
+                    lane: lane
+                };
+                
+                trafficCars.push(carGroup);
             }
         }
 
-        function drawObstacles() {
-            obstacles.forEach(obs => {
-                // Барьер
-                ctx.fillStyle = '#f00';
-                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-                
-                // Неоновый контур
-                ctx.strokeStyle = '#ff0';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(obs.x + 2, obs.y + 2, obs.width - 4, obs.height - 4);
-                
-                // Мигание
-                if (Math.sin(Date.now() * 0.005) > 0) {
-                    ctx.fillStyle = '#fff';
-                    ctx.fillRect(obs.x + 15, obs.y + 10, 10, 10);
-                }
+        function setupPhysics() {
+            // Включаем гравитацию
+            scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
+            
+            // Настраиваем коллизии для машины игрока
+            playerCar.physicsImpostor = new BABYLON.PhysicsImpostor(
+                playerCar,
+                BABYLON.PhysicsImpostor.BoxImpostor,
+                { mass: 1500, restitution: 0.2, friction: 0.8 },
+                scene
+            );
+            
+            // Коллизии для дороги
+            road.physicsImpostor = new BABYLON.PhysicsImpostor(
+                road,
+                BABYLON.PhysicsImpostor.BoxImpostor,
+                { mass: 0, restitution: 0.3, friction: 0.9 },
+                scene
+            );
+            
+            // Коллизии для машин трафика
+            trafficCars.forEach((car, index) => {
+                car.physicsImpostor = new BABYLON.PhysicsImpostor(
+                    car,
+                    BABYLON.PhysicsImpostor.BoxImpostor,
+                    { mass: 1000 + Math.random() * 500, restitution: 0.3, friction: 0.8 },
+                    scene
+                );
             });
         }
 
-        function updateData() {
-            for (let i = dataItems.length - 1; i >= 0; i--) {
-                dataItems[i].x -= config.obstacleSpeed * gameSpeed * 0.7;
+        function setupEventHandlers() {
+            // Управление с клавиатуры
+            scene.onKeyboardObservable.add((kbInfo) => {
+                if (!gameState.isPlaying) return;
                 
-                if (dataItems[i].x < -50) {
-                    dataItems.splice(i, 1);
+                switch (kbInfo.type) {
+                    case BABYLON.KeyboardEventTypes.KEYDOWN:
+                        switch (kbInfo.event.key) {
+                            case "ArrowLeft": input.left = true; break;
+                            case "ArrowRight": input.right = true; break;
+                            case " ": input.nitro = true; break;
+                            case "Shift": input.brake = true; break;
+                        }
+                        break;
+                        
+                    case BABYLON.KeyboardEventTypes.KEYUP:
+                        switch (kbInfo.event.key) {
+                            case "ArrowLeft": input.left = false; break;
+                            case "ArrowRight": input.right = false; break;
+                            case " ": input.nitro = false; break;
+                            case "Shift": input.brake = false; break;
+                        }
+                        break;
                 }
+            });
+            
+            // Сенсорное управление
+            const leftButton = document.getElementById('leftButton');
+            const rightButton = document.getElementById('rightButton');
+            const nitroButton = document.getElementById('nitroButton');
+            const brakeButton = document.getElementById('brakeButton');
+            
+            const setButtonActive = (button, active) => {
+                button.addEventListener(active ? 'touchstart' : 'touchend', (e) => {
+                    e.preventDefault();
+                    const state = active;
+                    switch(button.id) {
+                        case 'leftButton': input.left = state; break;
+                        case 'rightButton': input.right = state; break;
+                        case 'nitroButton': input.nitro = state; break;
+                        case 'brakeButton': input.brake = state; break;
+                    }
+                });
+                
+                button.addEventListener(active ? 'mousedown' : 'mouseup', () => {
+                    const state = active;
+                    switch(button.id) {
+                        case 'leftButton': input.left = state; break;
+                        case 'rightButton': input.right = state; break;
+                        case 'nitroButton': input.nitro = state; break;
+                        case 'brakeButton': input.brake = state; break;
+                    }
+                });
+            };
+            
+            setButtonActive(leftButton, true);
+            setButtonActive(leftButton, false);
+            setButtonActive(rightButton, true);
+            setButtonActive(rightButton, false);
+            setButtonActive(nitroButton, true);
+            setButtonActive(nitroButton, false);
+            setButtonActive(brakeButton, true);
+            setButtonActive(brakeButton, false);
+            
+            // Игровой цикл
+            scene.onBeforeRenderObservable.add(() => {
+                if (!gameState.isPlaying) return;
+                
+                updateGame();
+                updateCamera();
+                updateTraffic();
+                updateUI();
+            });
+        }
+
+        function updateGame() {
+            const deltaTime = engine.getDeltaTime() / 1000;
+            
+            // Ускорение/торможение
+            let acceleration = CONFIG.PLAYER.ACCELERATION;
+            
+            if (input.brake) {
+                acceleration = -CONFIG.PLAYER.BRAKE_FORCE;
+            }
+            
+            if (input.nitro && gameState.nitro > 0) {
+                acceleration *= CONFIG.PLAYER.NITRO_BOOST;
+                gameState.nitro -= CONFIG.PLAYER.NITRO_DRAIN * deltaTime;
+                
+                // Эффект нитро
+                createExhaustEffect();
+            } else if (!input.nitro && gameState.nitro < 100) {
+                gameState.nitro += CONFIG.PLAYER.NITRO_RECHARGE * deltaTime;
+            }
+            
+            // Обновление скорости
+            gameState.speed += acceleration * deltaTime;
+            gameState.speed = Math.max(0, Math.min(CONFIG.PLAYER.MAX_SPEED, gameState.speed));
+            
+            // Поворот
+            let turnAmount = 0;
+            if (input.left) turnAmount += CONFIG.PLAYER.TURN_SPEED;
+            if (input.right) turnAmount -= CONFIG.PLAYER.TURN_SPEED;
+            
+            playerCar.rotation.y += turnAmount * (gameState.speed / CONFIG.PLAYER.MAX_SPEED);
+            
+            // Движение вперед
+            const forward = new BABYLON.Vector3(
+                Math.sin(playerCar.rotation.y),
+                0,
+                Math.cos(playerCar.rotation.y)
+            );
+            
+            playerCar.position.addInPlace(
+                forward.scale(-gameState.speed * deltaTime)
+            );
+            
+            // Обновление статистики
+            gameState.distance += gameState.speed * deltaTime;
+            gameState.time += deltaTime;
+            
+            if (gameState.speed > gameState.maxSpeed) {
+                gameState.maxSpeed = gameState.speed;
+            }
+            
+            // Обновление RPM и передачи
+            updateGear();
+            
+            // Проверка столкновений
+            checkCollisions();
+            
+            // Ограничение движения по полосам
+            playerCar.position.x = Math.max(
+                -CONFIG.ROAD_WIDTH / 2 + 2,
+                Math.min(CONFIG.ROAD_WIDTH / 2 - 2, playerCar.position.x)
+            );
+            
+            // Завершение гонки через 2 минуты (для демо)
+            if (gameState.time > 120) {
+                finishRace();
             }
         }
 
-        function drawData() {
-            dataItems.forEach(data => {
-                if (!data.collected) {
-                    // Жесткий диск
-                    ctx.fillStyle = '#0f0';
-                    ctx.beginPath();
-                    ctx.arc(data.x + 10, data.y + 10, 10, 0, Math.PI * 2);
-                    ctx.fill();
+        function updateGear() {
+            const speedRatio = gameState.speed / CONFIG.PLAYER.MAX_SPEED;
+            
+            // Простая модель КПП
+            if (speedRatio < 0.2) {
+                gameState.gear = 1;
+                gameState.rpm = Math.floor(1000 + speedRatio * 4000);
+            } else if (speedRatio < 0.4) {
+                gameState.gear = 2;
+                gameState.rpm = Math.floor(1500 + (speedRatio - 0.2) * 3000);
+            } else if (speedRatio < 0.6) {
+                gameState.gear = 3;
+                gameState.rpm = Math.floor(2000 + (speedRatio - 0.4) * 2500);
+            } else if (speedRatio < 0.8) {
+                gameState.gear = 4;
+                gameState.rpm = Math.floor(2500 + (speedRatio - 0.6) * 2000);
+            } else {
+                gameState.gear = 5;
+                gameState.rpm = Math.floor(3000 + (speedRatio - 0.8) * 1500);
+            }
+        }
+
+        function updateCamera() {
+            // Динамическое положение камеры в зависимости от скорости
+            const targetPosition = new BABYLON.Vector3(
+                0,
+                5 + (gameState.speed / CONFIG.PLAYER.MAX_SPEED) * 3,
+                -12 - (gameState.speed / CONFIG.PLAYER.MAX_SPEED) * 8
+            );
+            
+            camera.position.x += (targetPosition.x - camera.position.x) * 0.05;
+            camera.position.y += (targetPosition.y - camera.position.y) * 0.05;
+            camera.position.z += (targetPosition.z - camera.position.z) * 0.05;
+        }
+
+        function updateTraffic() {
+            trafficCars.forEach(car => {
+                // Движение вперед
+                const forward = new BABYLON.Vector3(0, 0, 1);
+                car.position.addInPlace(
+                    forward.scale(car.userData.speed * engine.getDeltaTime() / 1000)
+                );
+                
+                // Возврат в начало при выходе за пределы
+                if (car.position.z > 100) {
+                    car.position.z = -CONFIG.ROAD_LENGTH * 0.9;
+                    car.userData.speed = CONFIG.TRAFFIC.MIN_SPEED + 
+                                       Math.random() * (CONFIG.TRAFFIC.MAX_SPEED - CONFIG.TRAFFIC.MIN_SPEED);
                     
-                    // Центр
-                    ctx.fillStyle = '#000';
-                    ctx.beginPath();
-                    ctx.arc(data.x + 10, data.y + 10, 4, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Свечение
-                    ctx.strokeStyle = '#0ff';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(data.x + 10, data.y + 10, 12, 0, Math.PI * 2);
-                    ctx.stroke();
-                    
-                    // Вращение
-                    ctx.strokeStyle = '#fff';
-                    ctx.beginPath();
-                    ctx.arc(data.x + 10, data.y + 10, 8, 
-                           Date.now() * 0.01, Date.now() * 0.01 + Math.PI * 0.5);
-                    ctx.stroke();
+                    // Случайная смена полосы
+                    if (Math.random() > 0.7) {
+                        car.userData.lane = Math.floor(Math.random() * 3) - 1;
+                    }
                 }
+                
+                // Плавное движение по полосе
+                const targetX = car.userData.lane * 8;
+                car.position.x += (targetX - car.position.x) * 0.02;
+                
+                // Небольшие покачивания
+                car.rotation.z = Math.sin(Date.now() * 0.001 + car.userData.speed) * 0.02;
             });
+        }
+
+        function createExhaustEffect() {
+            // Создаем частицы выхлопа при использовании нитро
+            if (Math.random() > 0.7) {
+                const particle = BABYLON.MeshBuilder.CreateSphere(
+                    "exhaustParticle",
+                    { diameter: 0.2 },
+                    scene
+                );
+                
+                const particleMaterial = new BABYLON.StandardMaterial("exhaustParticleMat", scene);
+                particleMaterial.emissiveColor = new BABYLON.Color3(1, 0.5, 0);
+                particleMaterial.diffuseColor = new BABYLON.Color3(1, 0.5, 0);
+                particleMaterial.alpha = 0.7;
+                particle.material = particleMaterial;
+                
+                // Позиция выхлопной трубы
+                const exhaustPos = new BABYLON.Vector3(
+                    Math.random() > 0.5 ? -0.5 : 0.5,
+                    -0.3,
+                    -2
+                );
+                
+                particle.position = playerCar.position.add(exhaustPos);
+                
+                // Движение частицы
+                particle.userData = {
+                    velocity: new BABYLON.Vector3(
+                        (Math.random() - 0.5) * 2,
+                        Math.random() * 0.5,
+                        -Math.random() * 3 - 2
+                    ),
+                    life: 1.0
+                };
+                
+                particles.push(particle);
+                
+                // Автоматическое удаление
+                setTimeout(() => {
+                    if (particle && scene.meshes.includes(particle)) {
+                        particle.dispose();
+                        particles = particles.filter(p => p !== particle);
+                    }
+                }, 1000);
+            }
         }
 
         function checkCollisions() {
-            // Проверка препятствий
-            obstacles.forEach(obs => {
-                if (player.x < obs.x + obs.width &&
-                    player.x + player.width > obs.x &&
-                    player.y < obs.y + obs.height &&
-                    player.y + player.height > obs.y) {
+            // Проверка столкновений с машинами трафика
+            for (const car of trafficCars) {
+                const distance = BABYLON.Vector3.Distance(playerCar.position, car.position);
+                
+                if (distance < 3) {
+                    // Столкновение
+                    const impactForce = (gameState.speed - car.userData.speed) * 0.1;
                     
-                    lives--;
-                    obstacles.splice(obstacles.indexOf(obs), 1);
+                    gameState.speed = Math.max(0, gameState.speed - impactForce * 10);
+                    gameState.score = Math.max(0, gameState.score - 100);
                     
-                    if (lives <= 0) {
-                        gameOver();
-                    }
+                    // Эффект столкновения
+                    createCollisionEffect(car.position);
+                    
+                    // Звук (добавить позже)
+                    
+                    break;
                 }
-            });
+            }
+        }
+
+        function createCollisionEffect(position) {
+            // Вспышка при столкновении
+            const flashLight = new BABYLON.PointLight(
+                "collisionFlash",
+                position,
+                scene
+            );
+            flashLight.diffuse = new BABYLON.Color3(1, 0.2, 0.1);
+            flashLight.intensity = 5;
+            flashLight.range = 10;
             
-            // Проверка данных
-            dataItems.forEach((data, index) => {
-                if (!data.collected &&
-                    player.x < data.x + data.width &&
-                    player.x + player.width > data.x &&
-                    player.y < data.y + data.height &&
-                    player.y + player.height > data.y) {
-                    
-                    data.collected = true;
-                    dataCollected++;
-                    score += 50;
-                    
-                    // Шанс восстановить жизнь
-                    if (Math.random() > 0.9 && lives < 5) {
-                        lives++;
+            // Автоматическое отключение
+            setTimeout(() => {
+                flashLight.dispose();
+            }, 100);
+            
+            // Частицы
+            for (let i = 0; i < 10; i++) {
+                const particle = BABYLON.MeshBuilder.CreateSphere(
+                    "collisionParticle",
+                    { diameter: 0.3 },
+                    scene
+                );
+                
+                const particleMaterial = new BABYLON.StandardMaterial("collisionParticleMat", scene);
+                particleMaterial.emissiveColor = new BABYLON.Color3(1, 0.5, 0);
+                particle.material = particleMaterial;
+                
+                particle.position = position.clone();
+                
+                particle.userData = {
+                    velocity: new BABYLON.Vector3(
+                        (Math.random() - 0.5) * 10,
+                        Math.random() * 5,
+                        (Math.random() - 0.5) * 10
+                    ),
+                    life: 1.0
+                };
+                
+                particles.push(particle);
+                
+                setTimeout(() => {
+                    if (particle && scene.meshes.includes(particle)) {
+                        particle.dispose();
+                        particles = particles.filter(p => p !== particle);
                     }
-                    
-                    dataItems.splice(index, 1);
-                }
-            });
-        }
-
-        // ========== УПРАВЛЕНИЕ ==========
-        function jump() {
-            if (!player.isJumping && gameRunning) {
-                player.velY = config.jumpForce;
-                player.isJumping = true;
-                player.isSliding = false;
+                }, 1000);
             }
         }
 
-        function stopJump() {
-            if (player.velY < -5) {
-                player.velY = -5;
-            }
-        }
-
-        function slide() {
-            if (!player.isJumping && gameRunning) {
-                player.isSliding = true;
-            }
-        }
-
-        function stopSlide() {
-            player.isSliding = false;
-        }
-
-        // ========== UI ==========
         function updateUI() {
-            document.getElementById('distance').textContent = Math.floor(distance);
-            document.getElementById('data').textContent = dataCollected;
-            document.getElementById('speed').textContent = 'x' + gameSpeed.toFixed(1);
-            document.getElementById('lives').textContent = lives;
+            document.getElementById('speedValue').textContent = 
+                Math.floor(gameState.speed) + ' км/ч';
+            document.getElementById('rpmValue').textContent = 
+                gameState.rpm;
+            document.getElementById('gearValue').textContent = 
+                gameState.gear;
+            document.getElementById('distanceValue').textContent = 
+                Math.floor(gameState.distance) + ' м';
+            document.getElementById('nitroValue').textContent = 
+                Math.floor(gameState.nitro) + '%';
+            
+            // Форматирование времени
+            const minutes = Math.floor(gameState.time / 60);
+            const seconds = Math.floor(gameState.time % 60);
+            document.getElementById('timeValue').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        function gameOver() {
-            gameRunning = false;
-            cancelAnimationFrame(animationId);
+        function finishRace() {
+            gameState.isPlaying = false;
             
-            // Проверяем рекорд
-            let isNewRecord = false;
-            if (distance > highScore) {
-                highScore = Math.floor(distance);
-                localStorage.setItem('cyberHighScore', highScore);
-                isNewRecord = true;
+            // Расчет очков
+            const timeBonus = Math.max(0, 120 - gameState.time) * 100;
+            const speedBonus = gameState.maxSpeed * 10;
+            const distanceBonus = gameState.distance / 10;
+            
+            gameState.totalScore = Math.floor(
+                timeBonus + speedBonus + distanceBonus + gameState.score
+            );
+            
+            // Обновление финального экрана
+            document.getElementById('finalTime').textContent = 
+                `${Math.floor(gameState.time / 60)}:${Math.floor(gameState.time % 60).toString().padStart(2, '0')}`;
+            document.getElementById('finalSpeed').textContent = 
+                Math.floor(gameState.maxSpeed) + ' км/ч';
+            document.getElementById('avgSpeed').textContent = 
+                Math.floor(gameState.distance / gameState.time * 3.6) + ' км/ч';
+            document.getElementById('finalScore').textContent = 
+                gameState.totalScore;
+            
+            // Сохранение рекорда
+            const highScore = localStorage.getItem('neonHighwayHighScore') || 0;
+            if (gameState.totalScore > highScore) {
+                localStorage.setItem('neonHighwayHighScore', gameState.totalScore);
             }
             
-            // Показываем экран Game Over
-            document.getElementById('finalDistance').textContent = Math.floor(distance);
-            document.getElementById('finalData').textContent = dataCollected;
-            document.getElementById('newRecord').textContent = isNewRecord ? 
-                `🏆 НОВЫЙ РЕКОРД! ${highScore}m` : `Рекорд: ${highScore}m`;
-            document.getElementById('gameOver').style.display = 'flex';
-            document.getElementById('controls').style.display = 'none';
+            // Переключение экранов
+            document.getElementById('gameUI').style.display = 'none';
+            document.getElementById('victoryScreen').style.display = 'flex';
         }
 
-        function restartGame() {
-            document.getElementById('gameOver').style.display = 'none';
+        // ========== УПРАВЛЕНИЕ ИГРОЙ ==========
+        function startGame() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('gameUI').style.display = 'block';
+            
+            // Сброс состояния
+            gameState = {
+                isPlaying: true,
+                speed: 0,
+                maxSpeed: 0,
+                distance: 0,
+                time: 0,
+                gear: 0,
+                rpm: 0,
+                nitro: 100,
+                score: 0,
+                totalScore: 0
+            };
+            
+            input = {
+                left: false,
+                right: false,
+                nitro: false,
+                brake: false
+            };
+            
+            // Сброс позиции игрока
+            playerCar.position = new BABYLON.Vector3(0, 1, 10);
+            playerCar.rotation.y = Math.PI;
+            
+            // Сброс трафика
+            trafficCars.forEach((car, i) => {
+                const lane = Math.floor(Math.random() * 3) - 1;
+                car.position = new BABYLON.Vector3(
+                    lane * 8,
+                    0.7,
+                    -Math.random() * CONFIG.ROAD_LENGTH * 0.8
+                );
+                car.userData.speed = CONFIG.TRAFFIC.MIN_SPEED + 
+                                   Math.random() * (CONFIG.TRAFFIC.MAX_SPEED - CONFIG.TRAFFIC.MIN_SPEED);
+            });
+        }
+
+        function restartRace() {
+            document.getElementById('victoryScreen').style.display = 'none';
             startGame();
         }
 
-        // ========== Telegram интеграция ==========
-        document.addEventListener('DOMContentLoaded', () => {
+        function backToMenu() {
+            document.getElementById('victoryScreen').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'flex';
+        }
+
+        function showCareer() {
+            alert('Режим карьеры появится в следующем обновлении!');
+        }
+
+        function showGarage() {
+            alert('Гараж с кастомизацией появится в следующем обновлении!');
+        }
+
+        function showMultiplayer() {
+            alert('Мультиплеер появится в следующем обновлении!');
+        }
+
+        function updateLoading(percent, text = '') {
+            const progress = document.getElementById('loadingProgress');
+            const textElement = document.getElementById('loadingText');
+            
+            if (progress) progress.style.width = percent + '%';
+            if (textElement && text) textElement.textContent = text;
+        }
+
+        // ========== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ==========
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Telegram интеграция
             try {
                 const tg = window.Telegram?.WebApp;
                 if (tg) {
                     tg.expand();
                     tg.enableClosingConfirmation();
                     
-                    // Показываем имя пользователя
+                    // Настройка цветов Telegram UI
+                    tg.setHeaderColor('#000000');
+                    tg.setBackgroundColor('#000000');
+                    
+                    // Получение данных пользователя
                     const user = tg.initDataUnsafe?.user;
                     if (user) {
-                        document.getElementById('startScreen').innerHTML += 
-                            `<p style="color: #0ff; margin: 10px;">👋 Привет, ${user.first_name}!</p>`;
+                        const playerInfo = document.getElementById('playerInfo');
+                        playerInfo.innerHTML = `
+                            <div style="color: #00ff88; margin-bottom: 10px; font-size: 1.1rem;">
+                                👤 Игрок: <strong>${user.first_name}</strong>
+                            </div>
+                        `;
+                        
+                        // Показываем рекорд
+                        const highScore = localStorage.getItem('neonHighwayHighScore');
+                        if (highScore) {
+                            playerInfo.innerHTML += `
+                                <div style="color: #0088ff; font-size: 0.9rem;">
+                                    🏆 Лучший счёт: ${highScore}
+                                </div>
+                            `;
+                        }
                     }
                 }
             } catch (e) {
-                console.log("Telegram не обнаружен, работает локально");
+                console.log("Режим разработки - без Telegram");
+            }
+            
+            // Запуск игры
+            try {
+                await initGame();
+            } catch (error) {
+                console.error('Ошибка инициализации игры:', error);
+                document.getElementById('loadingScreen').innerHTML = `
+                    <h1 style="color: #ff3366;">Ошибка загрузки</h1>
+                    <p style="color: #aaa; margin: 20px;">${error.message}</p>
+                    <button onclick="location.reload()" style="
+                        background: #00ff88;
+                        color: black;
+                        border: none;
+                        padding: 15px 30px;
+                        border-radius: 10px;
+                        font-size: 1rem;
+                        cursor: pointer;
+                        margin-top: 20px;
+                    ">
+                        Перезагрузить
+                    </button>
+                `;
             }
         });
     </script>
