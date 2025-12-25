@@ -1,714 +1,230 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CYBER COURIER 2049</title>
-    <style>
-        * { 
-            margin: 0; padding: 0; box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-        }
-        
-        body {
-            background: #0a0a1a;
-            color: white;
-            font-family: 'Courier New', monospace;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-        }
-        
-        #gameContainer {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        
-        canvas {
-            display: block;
-            background: linear-gradient(to bottom, #000428, #004e92);
-        }
-        
-        .ui-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 100;
-        }
-        
-        .stats {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #00ffea;
-        }
-        
-        .stat {
-            margin: 5px 0;
-            font-size: 18px;
-            text-shadow: 0 0 10px #00ffea;
-        }
-        
-        .controls {
-            position: absolute;
-            bottom: 30px;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            padding: 0 20px;
-        }
-        
-        .control-btn {
-            pointer-events: auto;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: rgba(0, 255, 234, 0.2);
-            border: 3px solid #00ffea;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 20px rgba(0, 255, 234, 0.5);
-            transition: all 0.1s;
-        }
-        
-        .control-btn:active {
-            transform: scale(0.9);
-            background: rgba(0, 255, 234, 0.4);
-        }
-        
-        .logo {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            text-shadow: 0 0 20px #ff00ff;
-            animation: pulse 2s infinite;
-        }
-        
-        .logo h1 {
-            font-size: 36px;
-            color: #00ffea;
-            margin-bottom: 10px;
-        }
-        
-        .logo p {
-            color: #ff6b00;
-            font-size: 18px;
-        }
-        
-        .start-btn {
-            pointer-events: auto;
-            margin-top: 30px;
-            padding: 15px 40px;
-            background: linear-gradient(45deg, #ff00ff, #00ffea);
-            border: none;
-            border-radius: 30px;
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        .notification {
-            position: absolute;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: 2px solid #ff6b00;
-            text-align: center;
-            animation: slideDown 0.5s;
-        }
-        
-        @keyframes slideDown {
-            from {
-                top: -50px;
-                opacity: 0;
-            }
-            to {
-                top: 100px;
-                opacity: 1;
-            }
-        }
-        
-        /* Неоновые эффекты */
-        .neon-text {
-            text-shadow: 
-                0 0 5px #fff,
-                0 0 10px #fff,
-                0 0 20px #fff,
-                0 0 40px #0ff,
-                0 0 80px #0ff,
-                0 0 90px #0ff,
-                0 0 100px #0ff,
-                0 0 150px #0ff;
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CYBER COURIER 2049</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background: #0a0a1a;
+    color: white;
+    font-family: Courier New, monospace;
+    overflow: hidden;
+}
+
+#gameContainer {
+    width: 100vw;
+    height: 100vh;
+}
+
+#startScreen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(#001, #000);
+    z-index: 10;
+}
+
+h1 {
+    color: #00ffea;
+    text-shadow: 0 0 20px #00ffea;
+    margin-bottom: 10px;
+}
+
+button {
+    margin-top: 25px;
+    padding: 15px 40px;
+    font-size: 20px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(45deg, #ff00ff, #00ffea);
+    color: white;
+    box-shadow: 0 0 30px #ff00ff;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 </head>
+
 <body>
-    <div id="gameContainer">
-        <!-- Game will be rendered here -->
-    </div>
-    
-    <div class="ui-overlay">
-        <!-- Логотип и старт -->
-        <div class="logo" id="startScreen">
-            <h1 class="neon-text">CYBER COURIER 2049</h1>
-            <p>Доставляй данные. Выживай. Доминируй.</p>
-            <button class="start-btn" onclick="startGame()">START RUN</button>
-            <p style="margin-top: 20px; font-size: 14px; color: #aaa;">
-                Тап/Пробел - прыжок | Удержание - слайд
-            </p>
-        </div>
-        
-        <!-- Статистика игры -->
-        <div class="stats" style="display: none;" id="gameStats">
-            <div class="stat">Дистанция: <span id="distance">0</span>m</div>
-            <div class="stat">Данные: <span id="data">0</span> GB</div>
-            <div class="stat">Скорость: <span id="speed">x1.0</span></div>
-            <div class="stat">Жизни: <span id="lives">3</span> ❤️</div>
-        </div>
-        
-        <!-- Уведомления -->
-        <div id="notification" class="notification" style="display: none;"></div>
-        
-        <!-- Управление -->
-        <div class="controls" style="display: none;" id="gameControls">
-            <button class="control-btn" id="jumpBtn">↑</button>
-            <button class="control-btn" id="slideBtn">↓</button>
-        </div>
-    </div>
 
-    <script>
-        // Конфигурация игры
-        const CONFIG = {
-            PLAYER_SPEED: 300,
-            GRAVITY: 800,
-            JUMP_FORCE: -400,
-            GROUND_HEIGHT: 100,
-            OBSTACLE_SPEED: 200,
-            DATA_SPAWN_RATE: 0.3
-        };
+<div id="startScreen">
+    <h1>CYBER COURIER 2049</h1>
+    <p>Доставляй данные. Выживай.</p>
+    <button onclick="startGame()">START RUN</button>
+</div>
 
-        // Состояние игры
-        let gameState = {
-            distance: 0,
-            dataCollected: 0,
-            speed: 1.0,
-            lives: 3,
-            isPlaying: false,
-            score: 0,
-            highScore: localStorage.getItem('cyberHighScore') || 0
-        };
+<div id="gameContainer"></div>
 
-        // Telegram интеграция
-        let tg;
-        try {
-            tg = window.Telegram.WebApp;
-            tg.expand();
-            tg.enableClosingConfirmation();
-            
-            // Настройка темы
-            tg.setHeaderColor('#0a0a1a');
-            tg.setBackgroundColor('#0a0a1a');
-            
-            // Получаем данные пользователя
-            const user = tg.initDataUnsafe?.user;
-            if (user) {
-                document.getElementById('startScreen').innerHTML += `
-                    <div style="margin-top: 20px; padding: 10px; background: rgba(255,107,0,0.2); border-radius: 10px;">
-                        <p>👋 Привет, ${user.first_name}!</p>
-                        <p style="font-size: 12px;">Твой рекорд: ${gameState.highScore}m</p>
-                    </div>
-                `;
-            }
-        } catch (e) {
-            tg = null;
-            console.log("Режим разработки - без Telegram");
-        }
+<script>
+/* ================= TELEGRAM ================= */
+let tg = null;
+try {
+    tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+} catch (e) {
+    console.log("Без Telegram");
+}
 
-        // Phaser конфигурация
-        const config = {
-            type: Phaser.AUTO,
-            width: window.innerWidth,
-            height: window.innerHeight,
-            parent: 'gameContainer',
-            physics: {
-                default: 'arcade',
-                arcade: {
-                    gravity: { y: CONFIG.GRAVITY },
-                    debug: false
-                }
-            },
-            scene: {
-                preload: preload,
-                create: create,
-                update: update
-            },
-            backgroundColor: 0x0a0a1a
-        };
+/* ================= GAME STATE ================= */
+const STATE = {
+    distance: 0,
+    lives: 3,
+    speed: 1
+};
 
-        let game;
-        let player;
-        let obstacles;
-        let dataItems;
-        let ground;
-        let cursors;
-        let distanceText;
-        let dataText;
-        let speedText;
-        let livesText;
-        let score = 0;
-        let gameSpeed = 1;
-        let isSliding = false;
-        let lastObstacleTime = 0;
+/* ================= PHASER SCENE ================= */
+class MainScene extends Phaser.Scene {
+    constructor() {
+        super('MainScene');
+    }
 
-        // Загрузка ассетов
-        function preload() {
-            // Создаем простую графику вместо загрузки изображений
-            this.createPlayerGraphics();
-            this.createObstacleGraphics();
-            this.createDataGraphics();
-        }
+    preload() {
+        const g = this.make.graphics({ x: 0, y: 0, add: false });
 
-        // Создание игровых объектов
-        function create() {
-            // Создаем землю
-            ground = this.add.rectangle(
-                config.width / 2, 
-                config.height - CONFIG.GROUND_HEIGHT / 2,
-                config.width, 
-                CONFIG.GROUND_HEIGHT,
-                0x004466
-            );
-            
-            this.physics.add.existing(ground, true);
-            
-            // Создаем игрока
-            player = this.physics.add.sprite(100, config.height - 150, 'player');
-            player.setCollideWorldBounds(true);
-            player.body.setSize(40, 60);
-            player.setBounce(0.2);
-            
-            // Группы для объектов
-            obstacles = this.physics.add.group();
-            dataItems = this.physics.add.group();
-            
-            // Столкновения
-            this.physics.add.collider(player, ground);
-            this.physics.add.overlap(player, obstacles, hitObstacle, null, this);
-            this.physics.add.overlap(player, dataItems, collectData, null, this);
-            
-            // Управление
-            cursors = this.input.keyboard.createCursorKeys();
-            
-            // Сенсорное управление
-            this.input.on('pointerdown', () => {
-                if (player.body.touching.down) {
-                    player.setVelocityY(CONFIG.JUMP_FORCE);
-                    showNotification("ПРЫЖОК!");
-                }
-            });
-            
-            // UI элементы
-            distanceText = this.add.text(20, 20, 'Дистанция: 0m', {
-                fontSize: '20px',
-                fill: '#00ffea',
-                fontFamily: 'Courier New'
-            });
-            
-            dataText = this.add.text(20, 50, 'Данные: 0 GB', {
-                fontSize: '20px',
-                fill: '#ff00ff',
-                fontFamily: 'Courier New'
-            });
-            
-            speedText = this.add.text(20, 80, 'Скорость: x1.0', {
-                fontSize: '20px',
-                fill: '#ff6b00',
-                fontFamily: 'Courier New'
-            });
-            
-            livesText = this.add.text(20, 110, 'Жизни: 3 ❤️', {
-                fontSize: '20px',
-                fill: '#ff3366',
-                fontFamily: 'Courier New'
-            });
-            
-            // Начальный спавн объектов
-            this.time.addEvent({
-                delay: 1000,
-                callback: spawnObstacle,
-                callbackScope: this,
-                loop: true
-            });
-            
-            this.time.addEvent({
-                delay: 500,
-                callback: spawnData,
-                callbackScope: this,
-                loop: true
-            });
-            
-            // Увеличиваем скорость каждые 10 секунд
-            this.time.addEvent({
-                delay: 10000,
-                callback: increaseSpeed,
-                callbackScope: this,
-                loop: true
-            });
-        }
+        g.fillStyle(0x00ffea);
+        g.fillRect(0, 0, 40, 60);
+        g.generateTexture('player', 40, 60);
 
-        // Обновление игры
-        function update(time) {
-            if (!gameState.isPlaying) return;
-            
-            // Обновление дистанции
-            gameState.distance += Math.floor(gameSpeed);
-            distanceText.setText('Дистанция: ' + gameState.distance + 'm');
-            
-            // Управление с клавиатуры
-            if (cursors.space.isDown && player.body.touching.down) {
-                player.setVelocityY(CONFIG.JUMP_FORCE);
-            }
-            
-            // Слайд (удержание стрелки вниз)
-            if (cursors.down.isDown && player.body.touching.down && !isSliding) {
-                isSliding = true;
-                player.body.setSize(40, 30);
-                player.setY(player.y + 15);
-            } else if (!cursors.down.isDown && isSliding) {
-                isSliding = false;
-                player.body.setSize(40, 60);
-                player.setY(player.y - 15);
-            }
-            
-            // Автоматическое движение препятствий
-            obstacles.getChildren().forEach(obstacle => {
-                obstacle.x -= CONFIG.OBSTACLE_SPEED * gameSpeed;
-                if (obstacle.x < -50) {
-                    obstacle.destroy();
-                }
-            });
-            
-            // Движение данных
-            dataItems.getChildren().forEach(data => {
-                data.x -= CONFIG.OBSTACLE_SPEED * gameSpeed * 0.8;
-                data.rotation += 0.05;
-                if (data.x < -50) {
-                    data.destroy();
-                }
-            });
-            
-            // Спавн препятствий (рандомный)
-            if (time > lastObstacleTime + 1000 / gameSpeed) {
-                if (Math.random() > 0.7) {
-                    spawnObstacle.call(this);
-                }
-                lastObstacleTime = time;
-            }
-        }
+        g.clear();
+        g.fillStyle(0xff3366);
+        g.fillRect(0, 0, 50, 80);
+        g.generateTexture('obstacle', 50, 80);
 
-        // Создание графики игрока
-        function createPlayerGraphics() {
-            const graphics = this.make.graphics({ x: 0, y: 0 }, false);
-            
-            // Тело (киборг)
-            graphics.fillStyle(0x00ffea);
-            graphics.fillRect(0, 0, 40, 60);
-            
-            // Голова
-            graphics.fillStyle(0xffffff);
-            graphics.fillRect(10, 5, 20, 20);
-            
-            // Глаза
-            graphics.fillStyle(0xff00ff);
-            graphics.fillRect(15, 10, 5, 5);
-            graphics.fillRect(30, 10, 5, 5);
-            
-            // Ноги
-            graphics.fillStyle(0xff6b00);
-            graphics.fillRect(5, 55, 10, 10);
-            graphics.fillRect(25, 55, 10, 10);
-            
-            graphics.generateTexture('player', 40, 60);
-            graphics.destroy();
-        }
+        g.clear();
+        g.fillStyle(0x00ffea);
+        g.fillCircle(15, 15, 15);
+        g.generateTexture('data', 30, 30);
 
-        // Создание графики препятствия
-        function createObstacleGraphics() {
-            const graphics = this.make.graphics({ x: 0, y: 0 }, false);
-            
-            // Барьер
-            graphics.fillStyle(0xff3366);
-            graphics.fillRect(0, 0, 50, 80);
-            
-            // Неоновое свечение
-            graphics.lineStyle(3, 0xff00ff, 1);
-            graphics.strokeRect(2, 2, 46, 76);
-            
-            graphics.generateTexture('obstacle', 50, 80);
-            graphics.destroy();
-        }
+        g.destroy();
+    }
 
-        // Создание графики данных
-        function createDataGraphics() {
-            const graphics = this.make.graphics({ x: 0, y: 0 }, false);
-            
-            // Жесткий диск
-            graphics.fillStyle(0x00ffea);
-            graphics.fillCircle(15, 15, 15);
-            
-            // Центр
-            graphics.fillStyle(0x000000);
-            graphics.fillCircle(15, 15, 5);
-            
-            // Свечение
-            graphics.lineStyle(2, 0xffffff, 0.8);
-            graphics.strokeCircle(15, 15, 17);
-            
-            graphics.generateTexture('data', 30, 30);
-            graphics.destroy();
-        }
+    create() {
+        this.physics.world.gravity.y = 900;
 
-        // Спавн препятствия
-        function spawnObstacle() {
-            const obstacle = obstacles.create(
-                config.width + 50,
-                config.height - CONFIG.GROUND_HEIGHT - 40,
-                'obstacle'
-            );
-            obstacle.setVelocityX(-CONFIG.OBSTACLE_SPEED * gameSpeed);
-        }
+        this.ground = this.add.rectangle(180, 600, 360, 80, 0x003344);
+        this.physics.add.existing(this.ground, true);
 
-        // Спавн данных
-        function spawnData() {
-            if (Math.random() < CONFIG.DATA_SPAWN_RATE) {
-                const data = dataItems.create(
-                    config.width + 50,
-                    Phaser.Math.Between(100, config.height - 200),
-                    'data'
-                );
-                data.setVelocityX(-CONFIG.OBSTACLE_SPEED * gameSpeed * 0.8);
-            }
-        }
+        this.player = this.physics.add.sprite(80, 480, 'player');
+        this.player.setCollideWorldBounds(true);
 
-        // Столкновение с препятствием
-        function hitObstacle(player, obstacle) {
-            obstacle.destroy();
-            gameState.lives--;
-            livesText.setText('Жизни: ' + gameState.lives + ' ❤️');
-            
-            // Эффект повреждения
-            player.setTint(0xff0000);
-            this.time.delayedCall(200, () => {
-                player.clearTint();
-            });
-            
-            showNotification("СТОЛКНОВЕНИЕ! -1 жизнь");
-            
-            if (gameState.lives <= 0) {
-                gameOver();
-            }
-        }
+        this.obstacles = this.physics.add.group();
+        this.dataItems = this.physics.add.group();
 
-        // Сбор данных
-        function collectData(player, data) {
-            data.destroy();
-            gameState.dataCollected++;
-            gameState.score += 100 * gameSpeed;
-            dataText.setText('Данные: ' + gameState.dataCollected + ' GB');
-            
-            // Эффект сбора
-            player.setTint(0x00ff00);
-            this.time.delayedCall(100, () => {
-                player.clearTint();
-            });
-            
-            // Случайный бонус
-            if (Math.random() > 0.8) {
-                gameState.lives = Math.min(5, gameState.lives + 1);
-                livesText.setText('Жизни: ' + gameState.lives + ' ❤️');
-                showNotification("БОНУС: +1 жизнь!");
-            }
-        }
+        this.physics.add.collider(this.player, this.ground);
+        this.physics.add.overlap(this.player, this.obstacles, this.hitObstacle, null, this);
+        this.physics.add.overlap(this.player, this.dataItems, this.collectData, null, this);
 
-        // Увеличение скорости
-        function increaseSpeed() {
-            gameSpeed += 0.1;
-            gameState.speed = gameSpeed.toFixed(1);
-            speedText.setText('Скорость: x' + gameState.speed);
-            showNotification("СКОРОСТЬ УВЕЛИЧЕНА!");
-        }
-
-        // Показать уведомление
-        function showNotification(text) {
-            const notification = document.getElementById('notification');
-            notification.textContent = text;
-            notification.style.display = 'block';
-            
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 1500);
-        }
-
-        // Завершение игры
-        function gameOver() {
-            gameState.isPlaying = false;
-            
-            // Сохраняем рекорд
-            if (gameState.distance > gameState.highScore) {
-                gameState.highScore = gameState.distance;
-                localStorage.setItem('cyberHighScore', gameState.highScore);
-            }
-            
-            // Показываем результаты
-            this.add.text(config.width / 2, config.height / 2 - 50, 'ИГРА ОКОНЧЕНА!', {
-                fontSize: '40px',
-                fill: '#ff3366',
-                fontFamily: 'Courier New'
-            }).setOrigin(0.5);
-            
-            this.add.text(config.width / 2, config.height / 2, `Дистанция: ${gameState.distance}m`, {
-                fontSize: '30px',
-                fill: '#00ffea',
-                fontFamily: 'Courier New'
-            }).setOrigin(0.5);
-            
-            this.add.text(config.width / 2, config.height / 2 + 40, `Собрано данных: ${gameState.dataCollected}GB`, {
-                fontSize: '30px',
-                fill: '#ff00ff',
-                fontFamily: 'Courier New'
-            }).setOrigin(0.5);
-            
-            this.add.text(config.width / 2, config.height / 2 + 80, `Рекорд: ${gameState.highScore}m`, {
-                fontSize: '25px',
-                fill: '#ff6b00',
-                fontFamily: 'Courier New'
-            }).setOrigin(0.5);
-            
-            // Кнопка рестарта
-            const restartBtn = this.add.text(config.width / 2, config.height / 2 + 140, 'ИГРАТЬ СНОВА', {
-                fontSize: '30px',
-                fill: '#ffffff',
-                backgroundColor: '#ff00ff',
-                padding: { x: 20, y: 10 },
-                fontFamily: 'Courier New'
-            }).setOrigin(0.5).setInteractive();
-            
-            restartBtn.on('pointerdown', () => {
-                this.scene.restart();
-                startGame();
-            });
-            
-            // Отправляем результат в Telegram
-            if (tg && tg.sendData) {
-                try {
-                    tg.sendData(JSON.stringify({
-                        action: 'game_complete',
-                        score: gameState.distance,
-                        data: gameState.dataCollected,
-                        highScore: gameState.highScore
-                    }));
-                } catch (e) {}
-            }
-        }
-
-        // Запуск игры
-        function startGame() {
-            document.getElementById('startScreen').style.display = 'none';
-            document.getElementById('gameStats').style.display = 'block';
-            document.getElementById('gameControls').style.display = 'flex';
-            
-            gameState.isPlaying = true;
-            gameState.distance = 0;
-            gameState.dataCollected = 0;
-            gameState.lives = 3;
-            gameState.speed = 1.0;
-            gameSpeed = 1.0;
-            
-            // Обновляем UI
-            document.getElementById('distance').textContent = '0';
-            document.getElementById('data').textContent = '0';
-            document.getElementById('speed').textContent = 'x1.0';
-            document.getElementById('lives').textContent = '3';
-            
-            // Настройка управления для телефона
-            document.getElementById('jumpBtn').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (player && player.body.touching.down) {
-                    player.setVelocityY(CONFIG.JUMP_FORCE);
-                }
-            });
-            
-            document.getElementById('slideBtn').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (player && player.body.touching.down && !isSliding) {
-                    isSliding = true;
-                    player.body.setSize(40, 30);
-                    player.setY(player.y + 15);
-                }
-            });
-            
-            document.getElementById('slideBtn').addEventListener('touchend', () => {
-                if (isSliding) {
-                    isSliding = false;
-                    player.body.setSize(40, 60);
-                    player.setY(player.y - 15);
-                }
-            });
-            
-            // Запускаем Phaser игру
-            if (!game) {
-                game = new Phaser.Game(config);
-            } else {
-                game.scene.start('default');
-            }
-        }
-
-        // Ресайз при повороте экрана
-        window.addEventListener('resize', () => {
-            if (game) {
-                game.scale.resize(window.innerWidth, window.innerHeight);
+        this.input.on('pointerdown', () => {
+            if (this.player.body.touching.down) {
+                this.player.setVelocityY(-420);
             }
         });
 
-        // Показываем рекорд при загрузке
-        window.addEventListener('load', () => {
-            if (gameState.highScore > 0) {
-                document.getElementById('startScreen').innerHTML += `
-                    <div style="margin-top: 20px; padding: 10px; background: rgba(255,0,255,0.2); border-radius: 10px;">
-                        <p>🏆 Лучший рекорд: ${gameState.highScore}m</p>
-                    </div>
-                `;
-            }
+        this.distanceText = this.add.text(10, 10, '0 m', { fontSize: '20px', fill: '#00ffea' });
+        this.livesText = this.add.text(10, 40, '❤️ 3', { fontSize: '20px', fill: '#ff3366' });
+
+        this.time.addEvent({
+            delay: 1200,
+            loop: true,
+            callback: () => this.spawnObstacle()
         });
-    </script>
+
+        this.time.addEvent({
+            delay: 800,
+            loop: true,
+            callback: () => this.spawnData()
+        });
+    }
+
+    update() {
+        STATE.distance += STATE.speed;
+        this.distanceText.setText(STATE.distance + ' m');
+
+        this.obstacles.getChildren().forEach(o => {
+            o.x -= 4 * STATE.speed;
+            if (o.x < -50) o.destroy();
+        });
+
+        this.dataItems.getChildren().forEach(d => {
+            d.x -= 3 * STATE.speed;
+            if (d.x < -50) d.destroy();
+        });
+    }
+
+    spawnObstacle() {
+        const o = this.obstacles.create(400, 500, 'obstacle');
+        o.body.allowGravity = false;
+    }
+
+    spawnData() {
+        if (Math.random() > 0.7) {
+            const d = this.dataItems.create(400, Phaser.Math.Between(200, 450), 'data');
+            d.body.allowGravity = false;
+        }
+    }
+
+    hitObstacle() {
+        STATE.lives--;
+        this.livesText.setText('❤️ ' + STATE.lives);
+
+        if (STATE.lives <= 0) {
+            this.scene.restart();
+            STATE.lives = 3;
+            STATE.distance = 0;
+        }
+    }
+
+    collectData(player, data) {
+        data.destroy();
+        STATE.speed += 0.05;
+    }
+}
+
+/* ================= GAME CONFIG ================= */
+const gameConfig = {
+    type: Phaser.AUTO,
+    width: 360,
+    height: 640,
+    parent: 'gameContainer',
+    physics: {
+        default: 'arcade'
+    },
+    scene: MainScene,
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
+    backgroundColor: '#0a0a1a'
+};
+
+let game = null;
+
+/* ================= START ================= */
+function startGame() {
+    document.getElementById('startScreen').style.display = 'none';
+
+    if (!game) {
+        game = new Phaser.Game(gameConfig);
+    } else {
+        game.scene.start('MainScene');
+    }
+}
+</script>
+
 </body>
 </html>
