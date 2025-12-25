@@ -3,19 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мицелий-68 • Лаборатория</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Мицелий-68: Оборона лаборатории</title>
     <style>
-        :root {
-            --bg: #0c0c1a;
-            --panel: #1a1a2e;
-            --accent: #00ff88;
-            --danger: #ff3366;
-            --warning: #ffaa00;
-            --text: #e0e0ff;
-            --border: #2a2a4a;
-        }
-        
         * {
             margin: 0;
             padding: 0;
@@ -23,368 +12,368 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            padding: 10px;
-            max-width: 500px;
-            margin: 0 auto;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(0, 255, 136, 0.05) 0%, transparent 20%),
-                radial-gradient(circle at 80% 70%, rgba(255, 51, 102, 0.05) 0%, transparent 20%);
+            background: #0a0a1a;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            position: relative;
         }
         
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        /* ИГРОВОЕ ПОЛЕ */
+        #gameContainer {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            background: 
+                linear-gradient(rgba(10, 10, 26, 0.9), rgba(10, 10, 26, 0.9)),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.1"><path d="M20,50 Q40,30 60,50 T100,50" stroke="%2300ff88" fill="none"/><circle cx="30" cy="30" r="2" fill="%2300ff88"/><circle cx="70" cy="70" r="2" fill="%2300ff88"/></svg>');
+            border: 3px solid #00ff88;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
         }
         
-        /* === HEADER === */
-        .header {
-            background: var(--panel);
-            border-radius: 15px;
-            padding: 15px;
-            border: 2px solid var(--border);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-        }
-        
-        .level-info {
+        /* ЛАБОРАТОРИЯ (БАЗА) */
+        #base {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            width: 120px;
+            height: 100px;
+            background: linear-gradient(45deg, #1a3a2a, #2a5a4a);
+            border: 3px solid #00ff88;
+            border-radius: 10px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.8); }
+        }
+        
+        /* ИГРОК (ГЕРОЙ) */
+        .player {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #00ff88;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 50;
+            transition: all 0.1s;
+            box-shadow: 0 0 10px #00ff88;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .player::after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            animation: ripple 1.5s infinite;
+        }
+        
+        @keyframes ripple {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        /* ВРАГИ */
+        .enemy {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 40;
+            transition: transform 0.3s;
+        }
+        
+        .enemy.mushroom {
+            background: radial-gradient(circle, #ff3366, #cc0044);
+            box-shadow: 0 0 15px #ff3366;
+        }
+        
+        .enemy.vine {
+            background: radial-gradient(circle, #00cc66, #008844);
+            box-shadow: 0 0 15px #00cc66;
+        }
+        
+        .enemy.spore {
+            background: radial-gradient(circle, #ffaa00, #cc8800);
+            box-shadow: 0 0 15px #ffaa00;
+        }
+        
+        .enemy.hit {
+            animation: hit 0.3s;
+        }
+        
+        @keyframes hit {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        
+        /* ПУЛИ/ВЫСТРЕЛЫ */
+        .bullet {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ff88;
+            z-index: 45;
+        }
+        
+        .spore-shot {
+            background: #ffaa00;
+            box-shadow: 0 0 10px #ffaa00;
+        }
+        
+        .electric-shot {
+            background: #00ccff;
+            box-shadow: 0 0 10px #00ccff;
+        }
+        
+        /* ИНТЕРФЕЙС */
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #00ff88;
+            min-width: 250px;
+            z-index: 1000;
+        }
+        
+        .stat {
+            display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            font-size: 16px;
         }
         
-        .level {
-            font-size: 14px;
-            color: var(--accent);
+        .stat-value {
+            color: #00ff88;
             font-weight: bold;
         }
         
-        .level-badge {
-            background: linear-gradient(45deg, var(--accent), #00cc6a);
-            color: black;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .progress-container {
-            background: rgba(255, 255, 255, 0.1);
+        .health-bar {
+            width: 100%;
             height: 20px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             overflow: hidden;
             margin: 10px 0;
-            position: relative;
         }
         
-        .progress-bar {
+        .health-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--accent), #00cc6a);
-            width: 0%;
-            transition: width 0.5s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(255, 255, 255, 0.3) 50%, 
-                transparent 100%);
-            animation: shimmer 2s infinite;
-        }
-        
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        .progress-text {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 12px;
-            color: white;
-            text-shadow: 1px 1px 2px black;
-        }
-        
-        /* === MAIN CONTENT === */
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-        
-        .card {
-            background: var(--panel);
-            border-radius: 15px;
-            padding: 20px;
-            border: 2px solid var(--border);
-        }
-        
-        .card-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            color: var(--accent);
-            font-size: 18px;
-        }
-        
-        .card-title i {
-            font-size: 24px;
-        }
-        
-        .counter {
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid var(--accent);
-            padding: 5px 15px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-        
-        /* === ГЕРОИ (УЧЁНЫЕ) === */
-        .heroes-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .hero-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            border: 2px solid transparent;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        
-        .hero-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.2);
-        }
-        
-        .hero-card.empty {
-            background: rgba(255, 255, 255, 0.03);
-            border: 2px dashed var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 40px;
-        }
-        
-        .hero-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-            display: block;
-        }
-        
-        .hero-name {
-            font-size: 14px;
-            margin-bottom: 5px;
-            color: var(--accent);
-        }
-        
-        .hero-stats {
-            font-size: 12px;
-            opacity: 0.8;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .hero-stat {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-        
-        /* === ЛАБОРАТОРИИ (КОМНАТЫ) === */
-        .rooms-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        
-        .room-card {
-            background: linear-gradient(135deg, rgba(42, 42, 74, 0.8), rgba(26, 26, 46, 0.8));
-            border-radius: 10px;
-            padding: 15px;
-            border: 2px solid var(--border);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .room-card.active {
-            border-color: var(--accent);
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
-        }
-        
-        .room-card.locked {
-            filter: grayscale(0.8);
-            opacity: 0.6;
-        }
-        
-        .room-icon {
-            font-size: 30px;
-            margin-bottom: 10px;
-            color: var(--accent);
-        }
-        
-        .room-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .room-desc {
-            font-size: 12px;
-            opacity: 0.8;
-            margin-bottom: 10px;
-        }
-        
-        .room-progress {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-        
-        .room-progress-fill {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
+            background: linear-gradient(90deg, #00ff88, #00cc66);
+            width: 100%;
             transition: width 0.5s;
         }
         
-        /* === ЗАДАНИЯ === */
-        .quest {
-            background: rgba(255, 170, 0, 0.1);
-            border: 1px solid var(--warning);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .wave-info {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 18px;
+            color: #ffaa00;
+            animation: glow 1s infinite alternate;
         }
         
-        .quest-icon {
-            font-size: 30px;
-            color: var(--warning);
+        @keyframes glow {
+            from { text-shadow: 0 0 5px #ffaa00; }
+            to { text-shadow: 0 0 15px #ffaa00; }
         }
         
-        .quest-text {
-            flex-grow: 1;
-        }
-        
-        .quest-reward {
-            background: var(--warning);
-            color: black;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 12px;
-        }
-        
-        /* === КНОПКИ ДЕЙСТВИЙ === */
-        .action-buttons {
+        /* КНОПКИ УПРАВЛЕНИЯ */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 60px);
             gap: 10px;
-            margin-top: 20px;
+            z-index: 1000;
         }
         
-        .btn {
-            padding: 15px;
-            border: none;
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 255, 136, 0.2);
+            border: 2px solid #00ff88;
             border-radius: 10px;
-            font-weight: bold;
-            font-size: 16px;
+            color: #00ff88;
+            font-size: 24px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0, 255, 136, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .control-btn.upgrade {
+            background: rgba(255, 170, 0, 0.2);
+            border-color: #ffaa00;
+            color: #ffaa00;
+        }
+        
+        /* СПОСОБНОСТИ */
+        #abilities {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            display: flex;
             gap: 10px;
+        }
+        
+        .ability {
+            width: 70px;
+            height: 70px;
+            background: rgba(0, 204, 255, 0.2);
+            border: 2px solid #00ccff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #00ccff;
+            font-size: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .ability.cooldown {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .ability-cooldown {
+            position: absolute;
+            bottom: 5px;
+            font-size: 12px;
+        }
+        
+        /* МЕНЮ */
+        #menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid #00ff88;
+            text-align: center;
+            z-index: 2000;
+            min-width: 300px;
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.5);
+        }
+        
+        #menu h1 {
+            color: #00ff88;
+            margin-bottom: 20px;
+            font-size: 28px;
+            text-shadow: 0 0 10px #00ff88;
+        }
+        
+        .menu-btn {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+            border: none;
+            color: black;
+            padding: 15px 30px;
+            margin: 10px 0;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
             transition: all 0.3s;
         }
         
-        .btn-primary {
-            background: linear-gradient(45deg, var(--accent), #00cc6a);
-            color: black;
-        }
-        
-        .btn-primary:hover {
+        .menu-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.4);
         }
         
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text);
-            border: 2px solid var(--border);
+        /* ЭФФЕКТЫ */
+        .explosion {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #ffaa00, transparent 70%);
+            border-radius: 50%;
+            animation: explode 0.5s forwards;
+            z-index: 60;
         }
         
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: var(--accent);
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
         }
         
-        .btn-danger {
-            background: linear-gradient(45deg, var(--danger), #ff0044);
-            color: white;
-            grid-column: span 2;
-            margin-top: 10px;
+        .damage-text {
+            position: absolute;
+            color: #ff3366;
+            font-weight: bold;
+            font-size: 18px;
+            animation: floatUp 1s forwards;
+            z-index: 70;
+            text-shadow: 2px 2px 0 black;
         }
         
-        /* === БОЕВАЯ СИСТЕМА === */
-        .battle-section {
-            background: rgba(255, 51, 102, 0.1);
-            border: 2px solid var(--danger);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 15px;
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
         }
         
-        .battle-title {
-            color: var(--danger);
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 20px;
+        /* ДОРОГИ/ПУТИ */
+        .path {
+            position: absolute;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px dashed rgba(0, 255, 136, 0.3);
         }
         
-        .enemy-display {
-            text-align: center;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .enemy-icon {
-            font-size: 60px;
-            margin-bottom: 10px;
+        /* РЕСУРСЫ */
+        .resource {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, #ffaa00, #cc8800);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
             animation: float 3s ease-in-out infinite;
+            cursor: pointer;
+            z-index: 30;
         }
         
         @keyframes float {
@@ -392,556 +381,971 @@
             50% { transform: translateY(-10px); }
         }
         
-        .enemy-health {
-            height: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 15px 0;
-        }
-        
-        .enemy-health-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--danger), #ff0044);
-            width: 100%;
-            transition: width 0.3s;
-        }
-        
-        .xp-reward {
-            color: var(--accent);
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        
-        /* === FOOTER === */
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 12px;
-            opacity: 0.6;
-        }
-        
-        /* === МОДАЛЬНЫЕ ОКНА === */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: var(--panel);
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 400px;
-            width: 90%;
-            border: 2px solid var(--accent);
-        }
-        
-        .modal-title {
-            color: var(--accent);
-            margin-bottom: 20px;
-            font-size: 24px;
-            text-align: center;
-        }
-        
-        .close-modal {
+        /* ВОЛНА ВРАГОВ */
+        .wave-indicator {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            color: var(--text);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px 40px;
+            border-radius: 10px;
+            border: 3px solid #ffaa00;
+            color: #ffaa00;
             font-size: 24px;
-            cursor: pointer;
+            font-weight: bold;
+            z-index: 1000;
+            animation: waveAlert 0.5s 3;
+        }
+        
+        @keyframes waveAlert {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- ШАПКА С УРОВНЕМ -->
-        <div class="header">
-            <div class="level-info">
-                <div class="level">Уровень института</div>
-                <div class="level-badge">11</div>
+    <!-- ИГРОВОЕ ПОЛЕ -->
+    <div id="gameContainer">
+        <!-- Лаборатория (база) -->
+        <div id="base">🏢</div>
+        
+        <!-- Дороги для врагов -->
+        <div class="path" id="path1" style="width: 300px; height: 5px; top: 100px; left: 0;"></div>
+        <div class="path" id="path2" style="width: 5px; height: 400px; top: 100px; left: 300px;"></div>
+        <div class="path" id="path3" style="width: 200px; height: 5px; top: 500px; left: 300px;"></div>
+        
+        <!-- Игроки, враги, пули генерируются через JS -->
+    </div>
+    
+    <!-- ИНТЕРФЕЙС -->
+    <div id="ui">
+        <div class="stat">
+            <span>Волна:</span>
+            <span class="stat-value" id="wave">1/10</span>
+        </div>
+        <div class="stat">
+            <span>Врагов:</span>
+            <span class="stat-value" id="enemiesCount">0</span>
+        </div>
+        <div class="stat">
+            <span>Опыт:</span>
+            <span class="stat-value" id="xp">0</span>
+        </div>
+        <div class="stat">
+            <span>Споры:</span>
+            <span class="stat-value" id="spores">1000</span>
+        </div>
+        
+        <div style="margin: 15px 0;">
+            <div style="display: flex; justify-content: space-between;">
+                <span>Здоровье базы:</span>
+                <span id="baseHealth">100/100</span>
             </div>
-            <div class="progress-container">
-                <div class="progress-bar" id="levelProgress" style="width: 92%"></div>
-                <div class="progress-text">154,965/168,000 опыта</div>
-            </div>
-            <div style="text-align: center; font-size: 12px; margin-top: 10px;">
-                Собирайте опыт из аномалий для повышения уровня
+            <div class="health-bar">
+                <div class="health-fill" id="baseHealthBar"></div>
             </div>
         </div>
         
-        <!-- ГЛАВНЫЙ КОНТЕНТ -->
-        <div class="main-content">
-            <!-- УЧЁНЫЕ (ГЕРОИ) -->
-            <div class="card">
-                <div class="card-title">
-                    <div><i class="fas fa-user-alt"></i> Учёные-микологи</div>
-                    <div class="counter">4/12</div>
-                </div>
-                <div class="heroes-grid" id="heroesGrid">
-                    <!-- Герои будут загружены через JS -->
-                </div>
-                <button class="btn btn-secondary" onclick="showRecruitModal()">
-                    <i class="fas fa-user-plus"></i> Нанять учёного
-                </button>
-            </div>
-            
-            <!-- ЛАБОРАТОРИИ (КОМНАТЫ) -->
-            <div class="card">
-                <div class="card-title">
-                    <div><i class="fas fa-flask"></i> Лаборатории</div>
-                    <div class="counter">2/10</div>
-                </div>
-                <div class="rooms-grid">
-                    <div class="room-card active">
-                        <div class="room-icon"><i class="fas fa-dna"></i></div>
-                        <div class="room-name">Био-лаборатория</div>
-                        <div class="room-desc">Производит споры</div>
-                        <div class="room-progress">
-                            <div class="room-progress-fill" style="width: 75%"></div>
-                        </div>
-                    </div>
-                    <div class="room-card active">
-                        <div class="room-icon"><i class="fas fa-bolt"></i></div>
-                        <div class="room-name">Энерго-блок</div>
-                        <div class="room-desc">Генерирует энергию</div>
-                        <div class="room-progress">
-                            <div class="room-progress-fill" style="width: 30%"></div>
-                        </div>
-                    </div>
-                    <div class="room-card locked">
-                        <div class="room-icon"><i class="fas fa-shield-alt"></i></div>
-                        <div class="room-name">Оружейная</div>
-                        <div class="room-desc">Заблокировано</div>
-                        <div style="font-size: 11px; color: var(--danger); margin-top: 5px;">
-                            Нужен 5 уровень
-                        </div>
-                    </div>
-                    <div class="room-card locked">
-                        <div class="room-icon"><i class="fas fa-hospital"></i></div>
-                        <div class="room-name">Инфирмария</div>
-                        <div class="room-desc">Заблокировано</div>
-                        <div style="font-size: 11px; color: var(--danger); margin-top: 5px;">
-                            Нужен 8 уровень
-                        </div>
-                    </div>
-                </div>
-                <button class="btn btn-secondary" onclick="showBuildModal()" style="margin-top: 15px;">
-                    <i class="fas fa-hammer"></i> Построить лабораторию
-                </button>
-            </div>
-            
-            <!-- ЗАДАНИЯ -->
-            <div class="card">
-                <div class="card-title">
-                    <div><i class="fas fa-tasks"></i> Задания института</div>
-                </div>
-                
-                <div class="quest">
-                    <div class="quest-icon"><i class="fas fa-fist-raised"></i></div>
-                    <div class="quest-text">Создайте 2 воинов 2-го уровня</div>
-                    <div class="quest-reward">+5000 опыта</div>
-                </div>
-                
-                <div class="quest">
-                    <div class="quest-icon"><i class="fas fa-users"></i></div>
-                    <div class="quest-text">Пригласите 3 друзей в игру</div>
-                    <div class="quest-reward">Разблокировка комнат</div>
-                </div>
-                
-                <div class="action-buttons">
-                    <button class="btn btn-secondary" onclick="inviteFriend()">
-                        <i class="fas fa-user-friends"></i> Пригласить друга
-                    </button>
-                    <button class="btn btn-primary" onclick="startBattle()">
-                        <i class="fas fa-fighter-jet"></i> В БОЙ!
-                    </button>
-                </div>
-            </div>
-            
-            <!-- БОЕВАЯ СИСТЕМА -->
-            <div class="battle-section">
-                <div class="battle-title">ЕЖЕДНЕВНАЯ АНОМАЛИЯ</div>
-                
-                <div class="enemy-display">
-                    <div class="enemy-icon">🍄👾</div>
-                    <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">
-                        МИКО-ГОЛЕМ
-                    </div>
-                    <div style="font-size: 14px; opacity: 0.8; margin-bottom: 15px;">
-                        Мутировавший грибной колосс. Очень опасен!
-                    </div>
-                    
-                    <div class="enemy-health">
-                        <div class="enemy-health-fill" id="enemyHealth" style="width: 100%"></div>
-                    </div>
-                    
-                    <div class="xp-reward">Награда: 15,000 опыта</div>
-                </div>
-                
-                <button class="btn btn-danger" onclick="attackEnemy()">
-                    <i class="fas fa-bolt"></i> АТАКОВАТЬ АНОМАЛИЮ
-                </button>
-            </div>
+        <div class="wave-info" id="waveInfo">Волна 1 через: 5</div>
+    </div>
+    
+    <!-- СПОСОБНОСТИ -->
+    <div id="abilities">
+        <div class="ability" id="ability1" onclick="useAbility(1)">
+            <div>⚡</div>
+            <div class="ability-cooldown">5с</div>
         </div>
-        
-        <!-- ФУТЕР -->
-        <div class="footer">
-            <div style="margin-bottom: 10px;">
-                <button class="btn btn-secondary" style="padding: 10px 20px; font-size: 14px;">
-                    <i class="fas fa-home"></i> База
-                </button>
-            </div>
-            МИЦЕЛИЙ-68 © 1986 НИИ "Прогресс-68"
+        <div class="ability" id="ability2" onclick="useAbility(2)">
+            <div>🌀</div>
+            <div class="ability-cooldown">10с</div>
         </div>
     </div>
     
-    <!-- МОДАЛЬНОЕ ОКНО НАЙМА -->
-    <div class="modal" id="recruitModal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('recruitModal')">×</button>
-            <div class="modal-title">НАЙМ УЧЁНОГО</div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                <div class="hero-card" onclick="recruitScientist('biol')">
-                    <div class="hero-icon">🧬</div>
-                    <div class="hero-name">БИОЛОГ</div>
-                    <div class="hero-stats">
-                        <div class="hero-stat">+5/сек</div>
-                    </div>
-                    <div style="font-size: 12px; margin-top: 10px; color: var(--accent);">
-                        1,000 споров
-                    </div>
-                </div>
-                
-                <div class="hero-card" onclick="recruitScientist('engineer')">
-                    <div class="hero-icon">⚡</div>
-                    <div class="hero-name">ИНЖЕНЕР</div>
-                    <div class="hero-stats">
-                        <div class="hero-stat">+10/сек</div>
-                    </div>
-                    <div style="font-size: 12px; margin-top: 10px; color: var(--accent);">
-                        2,500 споров
-                    </div>
-                </div>
-            </div>
-            
-            <div style="text-align: center; font-size: 14px; opacity: 0.8;">
-                Учёные автоматически производят ресурсы
-            </div>
+    <!-- КНОПКИ УПРАВЛЕНИЯ -->
+    <div id="controls">
+        <div class="control-btn" onclick="upgradeDamage()" title="Улучшить урон">
+            ⚔️
+        </div>
+        <div class="control-btn" onclick="upgradeSpeed()" title="Улучшить скорость">
+            🏃
+        </div>
+        <div class="control-btn upgrade" onclick="buyPlayer()" title="Купить учёного (500 споров)">
+            👨‍🔬
         </div>
     </div>
     
-    <!-- МОДАЛЬНОЕ ОКНО СТРОИТЕЛЬСТВА -->
-    <div class="modal" id="buildModal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeModal('buildModal')">×</button>
-            <div class="modal-title">СТРОИТЕЛЬСТВО</div>
-            
-            <div style="margin-bottom: 20px;">
-                <div style="background: rgba(0,255,136,0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="font-size: 30px;">🔬</div>
-                        <div>
-                            <div style="font-weight: bold;">ИССЛЕДОВАТЕЛЬСКАЯ</div>
-                            <div style="font-size: 14px; opacity: 0.8;">+20% к опыту от аномалий</div>
-                        </div>
-                    </div>
-                    <div style="margin-top: 10px; font-size: 14px;">
-                        <div>Требуется: 5,000 споров • Уровень 3</div>
-                        <button class="btn btn-primary" style="margin-top: 10px; padding: 10px;">Построить</button>
-                    </div>
-                </div>
-                
-                <div style="background: rgba(255,170,0,0.1); padding: 15px; border-radius: 10px;">
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="font-size: 30px;">🛡️</div>
-                        <div>
-                            <div style="font-weight: bold;">ОБОРОНИТЕЛЬНАЯ</div>
-                            <div style="font-size: 14px; opacity: 0.8;">-30% урона от аномалий</div>
-                        </div>
-                    </div>
-                    <div style="margin-top: 10px; font-size: 14px;">
-                        <div>Требуется: 8,000 споров • Уровень 5</div>
-                        <button class="btn btn-secondary" style="margin-top: 10px; padding: 10px;">Недоступно</button>
-                    </div>
-                </div>
-            </div>
+    <!-- ГЛАВНОЕ МЕНЮ -->
+    <div id="menu">
+        <h1>МИЦЕЛИЙ-68</h1>
+        <p style="margin-bottom: 20px; color: #00ff88;">Защити лабораторию от грибных мутантов!</p>
+        <button class="menu-btn" onclick="startGame()">▶️ НАЧАТЬ ИГРУ</button>
+        <button class="menu-btn" onclick="showInstructions()">📖 ОБУЧЕНИЕ</button>
+        <div style="margin-top: 20px; color: #ffaa00;">
+            Управление: кликайте по врагам для атаки
         </div>
     </div>
     
     <script>
-        // =========== ИГРОВЫЕ ДАННЫЕ ===========
-        let gameData = {
-            level: 11,
-            xp: 154965,
-            xpNeeded: 168000,
-            spores: 4250, // Игровая валюта
-            scientists: 4,
-            maxScientists: 12,
-            rooms: 2,
-            maxRooms: 10,
-            enemyHealth: 100,
-            maxEnemyHealth: 100
+        // =========== ИГРОВЫЕ ПЕРЕМЕННЫЕ ===========
+        let game = {
+            running: false,
+            wave: 1,
+            maxWaves: 10,
+            enemies: [],
+            players: [],
+            bullets: [],
+            resources: [],
+            effects: [],
+            baseHealth: 100,
+            maxBaseHealth: 100,
+            spores: 1000,
+            xp: 0,
+            lastSpawn: 0,
+            waveCooldown: 5,
+            playerDamage: 10,
+            playerAttackSpeed: 500,
+            abilities: {
+                lightning: { cooldown: 0, maxCooldown: 5000 },
+                vortex: { cooldown: 0, maxCooldown: 10000 }
+            }
         };
         
-        const scientists = [
-            { id: 1, type: "🧬", name: "Петров", role: "Биолог", production: "+5/сек", color: "#00ff88" },
-            { id: 2, type: "⚡", name: "Сидорова", role: "Инженер", production: "+10/сек", color: "#ffaa00" },
-            { id: 3, type: "🔬", name: "Иванов", role: "Исследователь", production: "+8/сек", color: "#3366ff" },
-            { id: 4, type: "💊", name: "Васильева", role: "Медик", production: "+3/сек", color: "#ff3366" }
-        ];
+        let playerIdCounter = 1;
         
-        // =========== ИНИЦИАЛИЗАЦИЯ ===========
-        function initGame() {
-            updateDisplay();
-            renderScientists();
-            updateLevelProgress();
+        // =========== ЗВУКОВЫЕ ЭФФЕКТЫ (простая имитация) ===========
+        const sounds = {
+            shoot: () => {
+                // Имитация звука выстрела
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.1);
+            },
             
-            // Автоматическое производство каждую секунду
-            setInterval(() => {
-                // Каждый учёный производит споры
-                let production = scientists.length * 5;
-                gameData.spores += production;
+            explosion: () => {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
                 
-                // Обновляем отображение
-                updateDisplay();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
                 
-                // Лог производства (раз в 10 секунд)
-                if (Math.random() > 0.9) {
-                    addLogEvent(`Учёные произвели ${production} споров`);
+                oscillator.frequency.value = 200;
+                oscillator.type = 'sawtooth';
+                
+                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.3);
+            }
+        };
+        
+        // =========== ИНИЦИАЛИЗАЦИЯ ИГРЫ ===========
+        function startGame() {
+            game.running = true;
+            document.getElementById('menu').style.display = 'none';
+            resetGame();
+            spawnInitialPlayers();
+            startWaveTimer();
+            gameLoop();
+        }
+        
+        function resetGame() {
+            game.wave = 1;
+            game.baseHealth = 100;
+            game.spores = 1000;
+            game.xp = 0;
+            game.enemies = [];
+            game.bullets = [];
+            game.resources = [];
+            game.effects = [];
+            
+            updateUI();
+            clearGameArea();
+            
+            // Создаём начальных игроков
+            spawnPlayer(100, 300);
+            spawnPlayer(150, 350);
+        }
+        
+        function spawnInitialPlayers() {
+            // Начальные игроки рядом с базой
+            spawnPlayer(200, 200);
+            spawnPlayer(250, 250);
+        }
+        
+        // =========== ИГРОВОЙ ЦИКЛ ===========
+        function gameLoop() {
+            if (!game.running) return;
+            
+            const now = Date.now();
+            
+            // Обновление врагов
+            updateEnemies();
+            
+            // Обновление пуль
+            updateBullets();
+            
+            // Обновление эффектов
+            updateEffects();
+            
+            // Обновление ресурсов
+            updateResources();
+            
+            // Обновление способностей
+            updateAbilities();
+            
+            // Авто-атака игроков
+            if (now - game.lastSpawn > game.playerAttackSpeed) {
+                autoAttack();
+                game.lastSpawn = now;
+            }
+            
+            // Проверка конца волны
+            if (game.enemies.length === 0 && game.waveCooldown <= 0) {
+                spawnWave();
+            }
+            
+            // Обновление UI
+            updateUI();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // =========== ИГРОКИ ===========
+        function spawnPlayer(x, y) {
+            const player = {
+                id: playerIdCounter++,
+                x: x,
+                y: y,
+                element: null,
+                target: null,
+                lastAttack: 0,
+                damage: game.playerDamage,
+                attackSpeed: 1000
+            };
+            
+            game.players.push(player);
+            
+            // Создаём визуальный элемент
+            const elem = document.createElement('div');
+            elem.className = 'player';
+            elem.id = `player-${player.id}`;
+            elem.textContent = '👨‍🔬';
+            elem.style.left = `${x}px`;
+            elem.style.top = `${y}px`;
+            
+            // Клик по игроку для ручного управления
+            elem.onclick = (e) => {
+                e.stopPropagation();
+                selectPlayer(player);
+            };
+            
+            document.getElementById('gameContainer').appendChild(elem);
+            player.element = elem;
+            
+            return player;
+        }
+        
+        function selectPlayer(player) {
+            // Подсвечиваем выбранного игрока
+            document.querySelectorAll('.player').forEach(p => {
+                p.style.boxShadow = '0 0 10px #00ff88';
+            });
+            player.element.style.boxShadow = '0 0 20px #ffaa00';
+            
+            // Показываем информацию о игроке
+            console.log(`Игрок ${player.id} выбран. Урон: ${player.damage}`);
+        }
+        
+        function autoAttack() {
+            game.players.forEach(player => {
+                if (game.enemies.length > 0) {
+                    // Находим ближайшего врага
+                    let nearestEnemy = null;
+                    let nearestDistance = Infinity;
+                    
+                    game.enemies.forEach(enemy => {
+                        const dx = player.x - enemy.x;
+                        const dy = player.y - enemy.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < nearestDistance && distance < 300) {
+                            nearestDistance = distance;
+                            nearestEnemy = enemy;
+                        }
+                    });
+                    
+                    if (nearestEnemy && Date.now() - player.lastAttack > player.attackSpeed) {
+                        shootAt(player, nearestEnemy);
+                        player.lastAttack = Date.now();
+                    }
+                }
+            });
+        }
+        
+        // =========== ВРАГИ ===========
+        function spawnEnemy(type, pathIndex = 0) {
+            const enemyTypes = {
+                mushroom: { emoji: '🍄', health: 30, speed: 1, damage: 5, color: 'mushroom' },
+                vine: { emoji: '🌿', health: 50, speed: 0.7, damage: 8, color: 'vine' },
+                spore: { emoji: '🦠', health: 20, speed: 1.5, damage: 3, color: 'spore' }
+            };
+            
+            const typeData = enemyTypes[type] || enemyTypes.mushroom;
+            
+            const enemy = {
+                id: Date.now() + Math.random(),
+                type: type,
+                emoji: typeData.emoji,
+                x: -50,
+                y: 100 + pathIndex * 60,
+                health: typeData.health,
+                maxHealth: typeData.health,
+                speed: typeData.speed,
+                damage: typeData.damage,
+                pathIndex: pathIndex,
+                element: null
+            };
+            
+            game.enemies.push(enemy);
+            
+            // Создаём визуальный элемент
+            const elem = document.createElement('div');
+            elem.className = `enemy ${enemy.color}`;
+            elem.id = `enemy-${enemy.id}`;
+            elem.textContent = enemy.emoji;
+            elem.style.left = `${enemy.x}px`;
+            elem.style.top = `${enemy.y}px`;
+            
+            // Клик по врагу для атаки
+            elem.onclick = (e) => {
+                e.stopPropagation();
+                attackEnemy(enemy);
+            };
+            
+            document.getElementById('gameContainer').appendChild(elem);
+            enemy.element = elem;
+            
+            return enemy;
+        }
+        
+        function updateEnemies() {
+            game.enemies = game.enemies.filter(enemy => {
+                // Движение к базе
+                if (enemy.x < 300) {
+                    enemy.x += enemy.speed;
+                } else if (enemy.y < 500) {
+                    enemy.y += enemy.speed;
+                } else if (enemy.x > 50) {
+                    enemy.x -= enemy.speed;
+                } else {
+                    // Враг достиг базы
+                    attackBase(enemy);
+                    return false;
+                }
+                
+                // Обновляем позицию
+                enemy.element.style.left = `${enemy.x}px`;
+                enemy.element.style.top = `${enemy.y}px`;
+                
+                // Проверяем здоровье
+                if (enemy.health <= 0) {
+                    killEnemy(enemy);
+                    return false;
+                }
+                
+                return true;
+            });
+        }
+        
+        function attackEnemy(enemy) {
+            // Ручная атака по врагу (клик)
+            createBullet(
+                enemy.x + 20,
+                enemy.y + 20,
+                enemy.x,
+                enemy.y,
+                'spore-shot'
+            );
+            
+            enemy.health -= game.playerDamage * 2; // Дополнительный урон за ручную атаку
+            
+            // Эффект попадания
+            enemy.element.classList.add('hit');
+            setTimeout(() => {
+                if (enemy.element) enemy.element.classList.remove('hit');
+            }, 300);
+            
+            // Текст урона
+            showDamage(enemy.x, enemy.y, game.playerDamage * 2);
+            
+            // Звук
+            sounds.shoot();
+            
+            // Если враг убит
+            if (enemy.health <= 0) {
+                killEnemy(enemy);
+            }
+        }
+        
+        function killEnemy(enemy) {
+            // Удаляем элемент
+            if (enemy.element && enemy.element.parentNode) {
+                enemy.element.parentNode.removeChild(enemy.element);
+            }
+            
+            // Награда
+            const xpReward = enemy.type === 'mushroom' ? 10 : 
+                            enemy.type === 'vine' ? 20 : 5;
+            game.xp += xpReward;
+            game.spores += xpReward * 5;
+            
+            // Эффект взрыва
+            createExplosion(enemy.x, enemy.y);
+            
+            // Случайный выпад ресурса
+            if (Math.random() > 0.7) {
+                createResource(enemy.x, enemy.y);
+            }
+            
+            // Звук
+            sounds.explosion();
+            
+            // Обновляем счётчик
+            updateUI();
+        }
+        
+        function attackBase(enemy) {
+            game.baseHealth -= enemy.damage;
+            createExplosion(50, 550); // Эффект у базы
+            
+            if (game.baseHealth <= 0) {
+                gameOver();
+            }
+            
+            updateUI();
+        }
+        
+        // =========== ВОЛНЫ ВРАГОВ ===========
+        function startWaveTimer() {
+            game.waveCooldown = 5;
+            
+            const timer = setInterval(() => {
+                game.waveCooldown--;
+                document.getElementById('waveInfo').textContent = 
+                    `Волна ${game.wave} через: ${game.waveCooldown}`;
+                
+                if (game.waveCooldown <= 0) {
+                    clearInterval(timer);
+                    spawnWave();
                 }
             }, 1000);
         }
         
-        // =========== ОТОБРАЖЕНИЕ ===========
-        function updateDisplay() {
-            // Обновляем прогресс уровня
-            updateLevelProgress();
+        function spawnWave() {
+            showWaveAlert(`ВОЛНА ${game.wave} НАЧИНАЕТСЯ!`);
             
-            // Обновляем счётчики
-            document.querySelectorAll('.counter')[0].textContent = `${scientists.length}/${gameData.maxScientists}`;
-            document.querySelectorAll('.counter')[1].textContent = `${gameData.rooms}/${gameData.maxRooms}`;
-        }
-        
-        function updateLevelProgress() {
-            const progress = (gameData.xp / gameData.xpNeeded) * 100;
-            document.getElementById('levelProgress').style.width = `${progress}%`;
-            document.querySelector('.progress-text').textContent = 
-                `${gameData.xp.toLocaleString()}/${gameData.xpNeeded.toLocaleString()} опыта`;
-        }
-        
-        function renderScientists() {
-            const grid = document.getElementById('heroesGrid');
-            grid.innerHTML = '';
+            const enemyCount = 5 + game.wave * 2;
+            const enemyTypes = ['mushroom', 'vine', 'spore'];
             
-            // Отображаем существующих учёных
-            scientists.forEach(scientist => {
-                const card = document.createElement('div');
-                card.className = 'hero-card';
-                card.innerHTML = `
-                    <div class="hero-icon">${scientist.type}</div>
-                    <div class="hero-name">${scientist.name}</div>
-                    <div class="hero-stats">
-                        <div class="hero-stat">${scientist.production}</div>
-                    </div>
-                    <div style="font-size: 11px; margin-top: 5px; color: ${scientist.color}">
-                        ${scientist.role}
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-            
-            // Добавляем пустые слоты
-            for (let i = scientists.length; i < gameData.maxScientists; i++) {
-                const emptyCard = document.createElement('div');
-                emptyCard.className = 'hero-card empty';
-                emptyCard.innerHTML = `<div>+</div>`;
-                emptyCard.onclick = () => showRecruitModal();
-                grid.appendChild(emptyCard);
-            }
-        }
-        
-        // =========== МОДАЛЬНЫЕ ОКНА ===========
-        function showRecruitModal() {
-            document.getElementById('recruitModal').classList.add('active');
-        }
-        
-        function showBuildModal() {
-            document.getElementById('buildModal').classList.add('active');
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-        
-        // =========== ДЕЙСТВИЯ ИГРОКА ===========
-        function recruitScientist(type) {
-            let cost = 0;
-            let newScientist = null;
-            
-            if (type === 'biol') {
-                cost = 1000;
-                if (gameData.spores >= cost) {
-                    newScientist = {
-                        id: scientists.length + 1,
-                        type: "🧫",
-                        name: "Новиков",
-                        role: "Миколог",
-                        production: "+6/сек",
-                        color: "#00cc88"
-                    };
-                }
-            } else if (type === 'engineer') {
-                cost = 2500;
-                if (gameData.spores >= cost) {
-                    newScientist = {
-                        id: scientists.length + 1,
-                        type: "🔧",
-                        name: "Кузнецов",
-                        role: "Техник",
-                        production: "+12/сек",
-                        color: "#ff9900"
-                    };
-                }
-            }
-            
-            if (newScientist && gameData.spores >= cost) {
-                gameData.spores -= cost;
-                scientists.push(newScientist);
-                renderScientists();
-                updateDisplay();
-                closeModal('recruitModal');
-                addLogEvent(`Нанят учёный: ${newScientist.name} (${newScientist.role})`);
-                
-                // Награда за достижение
-                if (scientists.length === 5) {
-                    gameData.xp += 5000;
-                    addLogEvent(`Достижение: 5 учёных! +5,000 опыта`, true);
-                }
-            } else {
-                alert(`Недостаточно споров! Нужно: ${cost}, у вас: ${gameData.spores}`);
-            }
-        }
-        
-        function attackEnemy() {
-            if (gameData.enemyHealth <= 0) return;
-            
-            // Урон зависит от количества учёных
-            const damage = 10 + (scientists.length * 2);
-            gameData.enemyHealth = Math.max(0, gameData.enemyHealth - damage);
-            
-            // Обновляем здоровье врага
-            const healthPercent = (gameData.enemyHealth / gameData.maxEnemyHealth) * 100;
-            document.getElementById('enemyHealth').style.width = `${healthPercent}%`;
-            
-            // Лог боя
-            addLogEvent(`Атака по аномалии! Нанесено ${damage} урона`);
-            
-            // Если враг побеждён
-            if (gameData.enemyHealth <= 0) {
-                const xpReward = 15000;
-                gameData.xp += xpReward;
-                
-                addLogEvent(`Аномалия уничтожена! Получено ${xpReward.toLocaleString()} опыта`, true);
-                
-                // Новый враг через 5 секунд
+            for (let i = 0; i < enemyCount; i++) {
                 setTimeout(() => {
-                    gameData.enemyHealth = gameData.maxEnemyHealth;
-                    document.getElementById('enemyHealth').style.width = '100%';
-                    addLogEvent(`Появилась новая аномалия!`);
-                }, 5000);
+                    const type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+                    spawnEnemy(type, i % 3);
+                }, i * 500);
+            }
+            
+            game.wave++;
+            
+            // Запускаем таймер следующей волны
+            if (game.wave <= game.maxWaves) {
+                setTimeout(() => {
+                    game.waveCooldown = 10 + game.wave;
+                    startWaveTimer();
+                }, enemyCount * 500 + 5000);
+            } else {
+                victory();
+            }
+        }
+        
+        // =========== СТРЕЛЬБА ===========
+        function shootAt(shooter, target) {
+            const bulletX = shooter.x + 20;
+            const bulletY = shooter.y + 20;
+            
+            createBullet(bulletX, bulletY, target.x, target.y);
+        }
+        
+        function createBullet(fromX, fromY, toX, toY, type = 'normal') {
+            const bullet = {
+                id: Date.now() + Math.random(),
+                x: fromX,
+                y: fromY,
+                targetX: toX,
+                targetY: toY,
+                speed: 10,
+                type: type,
+                element: null
+            };
+            
+            game.bullets.push(bullet);
+            
+            const elem = document.createElement('div');
+            elem.className = `bullet ${type === 'spore-shot' ? 'spore-shot' : 
+                              type === 'electric' ? 'electric-shot' : ''}`;
+            elem.style.left = `${bullet.x}px`;
+            elem.style.top = `${bullet.y}px`;
+            
+            document.getElementById('gameContainer').appendChild(elem);
+            bullet.element = elem;
+            
+            return bullet;
+        }
+        
+        function updateBullets() {
+            game.bullets = game.bullets.filter(bullet => {
+                // Движение к цели
+                const dx = bullet.targetX - bullet.x;
+                const dy = bullet.targetY - bullet.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                // Проверка уровня
-                if (gameData.xp >= gameData.xpNeeded) {
-                    levelUp();
+                if (distance < bullet.speed) {
+                    // Пуля достигла цели
+                    hitTarget(bullet.x, bullet.y);
+                    if (bullet.element.parentNode) {
+                        bullet.element.parentNode.removeChild(bullet.element);
+                    }
+                    return false;
                 }
+                
+                // Двигаем пулю
+                bullet.x += (dx / distance) * bullet.speed;
+                bullet.y += (dy / distance) * bullet.speed;
+                
+                bullet.element.style.left = `${bullet.x}px`;
+                bullet.element.style.top = `${bullet.y}px`;
+                
+                // Проверяем столкновение с врагами
+                game.enemies.forEach(enemy => {
+                    const enemyX = enemy.x + 17.5;
+                    const enemyY = enemy.y + 17.5;
+                    const bulletX = bullet.x + 4;
+                    const bulletY = bullet.y + 4;
+                    
+                    const dist = Math.sqrt(
+                        Math.pow(enemyX - bulletX, 2) + 
+                        Math.pow(enemyY - bulletY, 2)
+                    );
+                    
+                    if (dist < 25) { // Столкновение
+                        enemy.health -= bullet.type === 'electric' ? 30 : 
+                                       bullet.type === 'spore-shot' ? 15 : 10;
+                        
+                        if (bullet.element.parentNode) {
+                            bullet.element.parentNode.removeChild(bullet.element);
+                        }
+                        
+                        if (enemy.health <= 0) {
+                            killEnemy(enemy);
+                        } else {
+                            enemy.element.classList.add('hit');
+                            setTimeout(() => {
+                                if (enemy.element) enemy.element.classList.remove('hit');
+                            }, 300);
+                            
+                            showDamage(enemy.x, enemy.y, 
+                                bullet.type === 'electric' ? 30 : 
+                                bullet.type === 'spore-shot' ? 15 : 10);
+                        }
+                        
+                        return false;
+                    }
+                });
+                
+                return true;
+            });
+        }
+        
+        function hitTarget(x, y) {
+            createExplosion(x, y);
+        }
+        
+        // =========== СПОСОБНОСТИ ===========
+        function useAbility(abilityNum) {
+            const now = Date.now();
+            
+            if (abilityNum === 1 && game.abilities.lightning.cooldown <= now) {
+                // Молния - поражает всех врагов на экране
+                game.enemies.forEach(enemy => {
+                    enemy.health -= 30;
+                    createBullet(
+                        Math.random() * window.innerWidth,
+                        0,
+                        enemy.x,
+                        enemy.y,
+                        'electric'
+                    );
+                    
+                    if (enemy.health <= 0) {
+                        killEnemy(enemy);
+                    }
+                });
+                
+                game.abilities.lightning.cooldown = now + game.abilities.lightning.maxCooldown;
+                document.getElementById('ability1').classList.add('cooldown');
+                
+            } else if (abilityNum === 2 && game.abilities.vortex.cooldown <= now) {
+                // Вихрь - притягивает врагов и наносит урон
+                game.enemies.forEach(enemy => {
+                    enemy.x -= 100;
+                    enemy.health -= 20;
+                    
+                    if (enemy.health <= 0) {
+                        killEnemy(enemy);
+                    } else {
+                        showDamage(enemy.x, enemy.y, 20);
+                    }
+                });
+                
+                game.abilities.vortex.cooldown = now + game.abilities.vortex.maxCooldown;
+                document.getElementById('ability2').classList.add('cooldown');
+                
+                createExplosion(window.innerWidth / 2, window.innerHeight / 2);
+            }
+        }
+        
+        function updateAbilities() {
+            const now = Date.now();
+            
+            // Способность 1
+            if (game.abilities.lightning.cooldown > now) {
+                const remaining = Math.ceil((game.abilities.lightning.cooldown - now) / 1000);
+                document.querySelector('#ability1 .ability-cooldown').textContent = `${remaining}с`;
+            } else {
+                document.getElementById('ability1').classList.remove('cooldown');
+                document.querySelector('#ability1 .ability-cooldown').textContent = '⚡';
             }
             
-            updateDisplay();
-        }
-        
-        function levelUp() {
-            gameData.level++;
-            gameData.xp = gameData.xp - gameData.xpNeeded;
-            gameData.xpNeeded = Math.floor(gameData.xpNeeded * 1.3);
-            
-            addLogEvent(`🎉 Уровень повышен! Теперь уровень ${gameData.level}`, true);
-            
-            // Награда за уровень
-            gameData.spores += gameData.level * 1000;
-            
-            // Разблокировка комнат на определённых уровнях
-            if (gameData.level === 5) {
-                addLogEvent(`Разблокирована Оружейная лаборатория!`, true);
+            // Способность 2
+            if (game.abilities.vortex.cooldown > now) {
+                const remaining = Math.ceil((game.abilities.vortex.cooldown - now) / 1000);
+                document.querySelector('#ability2 .ability-cooldown').textContent = `${remaining}с`;
+            } else {
+                document.getElementById('ability2').classList.remove('cooldown');
+                document.querySelector('#ability2 .ability-cooldown').textContent = '🌀';
             }
-            if (gameData.level === 8) {
-                addLogEvent(`Разблокирована Инфирмария!`, true);
+        }
+        
+        // =========== РЕСУРСЫ ===========
+        function createResource(x, y) {
+            const resource = {
+                id: Date.now() + Math.random(),
+                x: x,
+                y: y,
+                type: 'spore',
+                value: 50,
+                element: null
+            };
+            
+            game.resources.push(resource);
+            
+            const elem = document.createElement('div');
+            elem.className = 'resource';
+            elem.textContent = '🍄';
+            elem.style.left = `${x}px`;
+            elem.style.top = `${y}px`;
+            elem.onclick = () => collectResource(resource);
+            
+            document.getElementById('gameContainer').appendChild(elem);
+            resource.element = elem;
+            
+            // Авто-сбор через 10 секунд
+            setTimeout(() => {
+                if (resource.element && resource.element.parentNode) {
+                    resource.element.parentNode.removeChild(resource.element);
+                    game.resources = game.resources.filter(r => r.id !== resource.id);
+                }
+            }, 10000);
+        }
+        
+        function updateResources() {
+            // Автоматический сбор ресурсов игроками
+            game.players.forEach(player => {
+                game.resources.forEach(resource => {
+                    const dx = player.x - resource.x;
+                    const dy = player.y - resource.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 50 && resource.element && resource.element.parentNode) {
+                        collectResource(resource);
+                    }
+                });
+            });
+        }
+        
+        function collectResource(resource) {
+            game.spores += resource.value;
+            
+            // Эффект сбора
+            const effect = document.createElement('div');
+            effect.className = 'damage-text';
+            effect.textContent = `+${resource.value}`;
+            effect.style.left = `${resource.x}px`;
+            effect.style.top = `${resource.y}px`;
+            effect.style.color = '#ffaa00';
+            
+            document.getElementById('gameContainer').appendChild(effect);
+            setTimeout(() => {
+                if (effect.parentNode) effect.parentNode.removeChild(effect);
+            }, 1000);
+            
+            // Удаляем ресурс
+            if (resource.element && resource.element.parentNode) {
+                resource.element.parentNode.removeChild(resource.element);
             }
             
-            updateDisplay();
+            game.resources = game.resources.filter(r => r.id !== resource.id);
+            updateUI();
         }
         
-        function startBattle() {
-            addLogEvent(`Битва с аномалией началась!`);
-            // Можно добавить переход в отдельный экран боя
-        }
-        
-        function inviteFriend() {
-            addLogEvent(`Приглашение другу отправлено!`);
-            // Здесь будет интеграция с Telegram для приглашений
-        }
-        
-        function addLogEvent(message, isImportant = false) {
-            // Создаём временное уведомление
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${isImportant ? 'var(--accent)' : 'var(--panel)'};
-                color: ${isImportant ? 'black' : 'var(--text)'};
-                padding: 15px;
-                border-radius: 10px;
-                border: 2px solid ${isImportant ? 'var(--accent)' : 'var(--border)'};
-                z-index: 1000;
-                max-width: 300px;
-                animation: slideIn 0.5s, fadeOut 0.5s 2.5s;
-            `;
+        // =========== ЭФФЕКТЫ ===========
+        function createExplosion(x, y) {
+            const explosion = {
+                id: Date.now() + Math.random(),
+                x: x,
+                y: y,
+                element: null
+            };
             
-            notification.textContent = message;
-            document.body.appendChild(notification);
+            game.effects.push(explosion);
+            
+            const elem = document.createElement('div');
+            elem.className = 'explosion';
+            elem.style.left = `${x - 25}px`;
+            elem.style.top = `${y - 25}px`;
+            
+            document.getElementById('gameContainer').appendChild(elem);
+            explosion.element = elem;
+            
+            // Удаляем через 0.5 секунд
+            setTimeout(() => {
+                if (elem.parentNode) elem.parentNode.removeChild(elem);
+                game.effects = game.effects.filter(e => e.id !== explosion.id);
+            }, 500);
+        }
+        
+        function showDamage(x, y, damage) {
+            const damageText = document.createElement('div');
+            damageText.className = 'damage-text';
+            damageText.textContent = `-${damage}`;
+            damageText.style.left = `${x}px`;
+            damageText.style.top = `${y}px`;
+            
+            document.getElementById('gameContainer').appendChild(damageText);
             
             setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 3000);
+                if (damageText.parentNode) {
+                    damageText.parentNode.removeChild(damageText);
+                }
+            }, 1000);
         }
         
-        // Запуск игры при загрузке
-        window.onload = initGame;
+        function updateEffects() {
+            // Эффекты удаляются автоматически по таймеру
+        }
         
-        // Закрытие модальных окон по клику вне их
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('active');
-                }
+        // =========== UI И УПРАВЛЕНИЕ ===========
+        function updateUI() {
+            document.getElementById('wave').textContent = `${game.wave}/${game.maxWaves}`;
+            document.getElementById('enemiesCount').textContent = game.enemies.length;
+            document.getElementById('xp').textContent = game.xp;
+            document.getElementById('spores').textContent = game.spores;
+            document.getElementById('baseHealth').textContent = `${game.baseHealth}/${game.maxBaseHealth}`;
+            document.getElementById('baseHealthBar').style.width = `${(game.baseHealth / game.maxBaseHealth) * 100}%`;
+        }
+        
+        function upgradeDamage() {
+            if (game.spores >= 200) {
+                game.spores -= 200;
+                game.playerDamage += 5;
+                updateUI();
+                
+                // Визуальный эффект
+                const effect = document.createElement('div');
+                effect.className = 'damage-text';
+                effect.textContent = 'УРОН +5';
+                effect.style.left = '50%';
+                effect.style.top = '50%';
+                effect.style.color = '#00ff88';
+                effect.style.fontSize = '24px';
+                
+                document.getElementById('gameContainer').appendChild(effect);
+                setTimeout(() => {
+                    if (effect.parentNode) effect.parentNode.removeChild(effect);
+                }, 1000);
+            }
+        }
+        
+        function upgradeSpeed() {
+            if (game.spores >= 150) {
+                game.spores -= 150;
+                game.playerAttackSpeed = Math.max(200, game.playerAttackSpeed - 100);
+                updateUI();
+            }
+        }
+        
+        function buyPlayer() {
+            if (game.spores >= 500 && game.players.length < 8) {
+                game.spores -= 500;
+                
+                // Спавним нового игрока рядом с базой
+                const x = 200 + Math.random() * 100;
+                const y = 200 + Math.random() * 100;
+                spawnPlayer(x, y);
+                
+                updateUI();
+            }
+        }
+        
+        // =========== ИГРОВЫЕ СОБЫТИЯ ===========
+        function showWaveAlert(text) {
+            const alert = document.createElement('div');
+            alert.className = 'wave-indicator';
+            alert.textContent = text;
+            
+            document.getElementById('gameContainer').appendChild(alert);
+            
+            setTimeout(() => {
+                if (alert.parentNode) alert.parentNode.removeChild(alert);
+            }, 2000);
+        }
+        
+        function gameOver() {
+            game.running = false;
+            
+            const gameOverScreen = document.createElement('div');
+            gameOverScreen.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.9);
+                padding: 40px;
+                border-radius: 15px;
+                border: 3px solid #ff3366;
+                text-align: center;
+                color: #ff3366;
+                z-index: 2000;
+                min-width: 300px;
+            `;
+            
+            gameOverScreen.innerHTML = `
+                <h1 style="margin-bottom: 20px;">ЛАБОРАТОРИЯ УНИЧТОЖЕНА</h1>
+                <p style="margin-bottom: 20px; font-size: 18px;">
+                    Волна: ${game.wave}<br>
+                    Опыт: ${game.xp}<br>
+                    Споры: ${game.spores}
+                </p>
+                <button class="menu-btn" onclick="location.reload()" 
+                        style="background: #ff3366; color: white;">
+                    🔄 НАЧАТЬ ЗАНОВО
+                </button>
+            `;
+            
+            document.getElementById('gameContainer').appendChild(gameOverScreen);
+        }
+        
+        function victory() {
+            game.running = false;
+            
+            const victoryScreen = document.createElement('div');
+            victoryScreen.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.9);
+                padding: 40px;
+                border-radius: 15px;
+                border: 3px solid #00ff88;
+                text-align: center;
+                color: #00ff88;
+                z-index: 2000;
+                min-width: 300px;
+            `;
+            
+            victoryScreen.innerHTML = `
+                <h1 style="margin-bottom: 20px;">🏆 ПОБЕДА!</h1>
+                <p style="margin-bottom: 20px; font-size: 18px;">
+                    Вы защитили лабораторию!<br>
+                    Все 10 волн отражены!<br>
+                    Итоговый счёт: ${game.xp}
+                </p>
+                <button class="menu-btn" onclick="location.reload()">
+                    🎮 ИГРАТЬ ЕЩЁ
+                </button>
+            `;
+            
+            document.getElementById('gameContainer').appendChild(victoryScreen);
+        }
+        
+        function showInstructions() {
+            alert(`🎮 УПРАВЛЕНИЕ:
+1. Кликайте по врагам для ручной атаки
+2. Учёные атакуют автоматически
+3. Собирайте выпавшие ресурсы (клик)
+4. Используйте способности (кнопки справа)
+5. Улучшайте учёных за споры
+
+Цель: защитить лабораторию 10 волн врагов!`);
+        }
+        
+        function clearGameArea() {
+            document.querySelectorAll('.player, .enemy, .bullet, .resource, .explosion, .damage-text').forEach(el => {
+                if (el.parentNode) el.parentNode.removeChild(el);
             });
-        });
+            game.players = [];
+        }
+        
+        // =========== ЗАПУСК ===========
+        // Клик по игровому полю для ручной атаки
+        document.getElementById('gameContainer').onclick = (e) => {
+            if (!game.running) return;
+            
+            // Создаём эффект клика
+            const clickEffect = document.createElement('div');
+            clickEffect.style.cssText = `
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                background: rgba(0, 255, 136, 0.5);
+                border-radius: 50%;
+                left: ${e.clientX - 10}px;
+                top: ${e.clientY - 10}px;
+                animation: explode 0.3s forwards;
+            `;
+            
+            document.getElementById('gameContainer').appendChild(clickEffect);
+            setTimeout(() => {
+                if (clickEffect.parentNode) clickEffect.parentNode.removeChild(clickEffect);
+            }, 300);
+            
+            sounds.shoot();
+        };
     </script>
 </body>
 </html>
