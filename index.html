@@ -1,230 +1,581 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>CYBER COURIER 2049</title>
-
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-body {
-    background: #0a0a1a;
-    color: white;
-    font-family: Courier New, monospace;
-    overflow: hidden;
-}
-
-#gameContainer {
-    width: 100vw;
-    height: 100vh;
-}
-
-#startScreen {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(#001, #000);
-    z-index: 10;
-}
-
-h1 {
-    color: #00ffea;
-    text-shadow: 0 0 20px #00ffea;
-    margin-bottom: 10px;
-}
-
-button {
-    margin-top: 25px;
-    padding: 15px 40px;
-    font-size: 20px;
-    border-radius: 30px;
-    border: none;
-    cursor: pointer;
-    background: linear-gradient(45deg, #ff00ff, #00ffea);
-    color: white;
-    box-shadow: 0 0 30px #ff00ff;
-}
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Courier</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #000; 
+            color: #0ff; 
+            font-family: Arial, sans-serif; 
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #gameCanvas {
+            display: block;
+            background: #111;
+        }
+        
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 20px;
+            text-shadow: 0 0 10px #0ff;
+        }
+        
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #0ff;
+            text-align: center;
+            z-index: 100;
+        }
+        
+        h1 {
+            font-size: 40px;
+            margin-bottom: 20px;
+            color: #f0f;
+            text-shadow: 0 0 20px #f0f;
+        }
+        
+        button {
+            background: #00aaff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            border-radius: 10px;
+            margin: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+        
+        #controls {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+        }
+        
+        .controlBtn {
+            width: 80px;
+            height: 80px;
+            background: rgba(0,255,255,0.3);
+            border: 3px solid #0ff;
+            border-radius: 50%;
+            color: white;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #gameOver {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+    </style>
 </head>
-
 <body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="ui">
+            <div>Дистанция: <span id="distance">0</span>m</div>
+            <div>Данные: <span id="data">0</span> GB</div>
+            <div>Скорость: <span id="speed">x1.0</span></div>
+            <div>Жизни: <span id="lives">3</span></div>
+        </div>
+        
+        <div id="startScreen">
+            <h1>🚀 CYBER COURIER</h1>
+            <p>Доставляй данные в киберпространстве</p>
+            <p style="color: #ff0; margin: 20px;">Тап/Пробел - Прыжок | Удержание - Слайд</p>
+            <button onclick="startGame()">СТАРТ</button>
+            <p id="highScore" style="margin-top: 20px; color: #0f0;"></p>
+        </div>
+        
+        <div id="controls" style="display: none;">
+            <div class="controlBtn" ontouchstart="jump()" ontouchend="stopJump()">↑</div>
+            <div class="controlBtn" ontouchstart="slide()" ontouchend="stopSlide()">↓</div>
+        </div>
+        
+        <div id="gameOver">
+            <h1 style="color: #f00;">ИГРА ОКОНЧЕНА</h1>
+            <p>Дистанция: <span id="finalDistance">0</span>m</p>
+            <p>Собрано данных: <span id="finalData">0</span> GB</p>
+            <p style="color: #ff0; margin: 20px;" id="newRecord"></p>
+            <button onclick="restartGame()">ИГРАТЬ СНОВА</button>
+        </div>
+    </div>
 
-<div id="startScreen">
-    <h1>CYBER COURIER 2049</h1>
-    <p>Доставляй данные. Выживай.</p>
-    <button onclick="startGame()">START RUN</button>
-</div>
+    <script>
+        // ========== НАСТРОЙКИ ИГРЫ ==========
+        const config = {
+            playerSpeed: 5,
+            jumpForce: -15,
+            gravity: 0.8,
+            groundY: 0,
+            obstacleSpeed: 6,
+            gameSpeed: 1,
+            minGap: 150,
+            maxGap: 300
+        };
 
-<div id="gameContainer"></div>
+        // ========== ПЕРЕМЕННЫЕ ИГРЫ ==========
+        let canvas, ctx;
+        let player = { x: 100, y: 0, width: 50, height: 80, velY: 0, isJumping: false, isSliding: false };
+        let obstacles = [];
+        let dataItems = [];
+        let score = 0;
+        let distance = 0;
+        let dataCollected = 0;
+        let lives = 3;
+        let gameRunning = false;
+        let gameSpeed = 1;
+        let lastObstacleTime = 0;
+        let animationId;
+        let highScore = localStorage.getItem('cyberHighScore') || 0;
 
-<script>
-/* ================= TELEGRAM ================= */
-let tg = null;
-try {
-    tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-} catch (e) {
-    console.log("Без Telegram");
-}
+        // ========== ИНИЦИАЛИЗАЦИЯ ==========
+        window.onload = function() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Устанавливаем размер canvas
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Показываем рекорд
+            if (highScore > 0) {
+                document.getElementById('highScore').textContent = `🏆 Рекорд: ${highScore}m`;
+            }
+            
+            // Клавиатура для ПК
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && gameRunning) {
+                    jump();
+                }
+                if (e.code === 'ArrowDown' && gameRunning) {
+                    slide();
+                }
+            });
+            
+            document.addEventListener('keyup', (e) => {
+                if (e.code === 'ArrowDown' && gameRunning) {
+                    stopSlide();
+                }
+            });
+        };
 
-/* ================= GAME STATE ================= */
-const STATE = {
-    distance: 0,
-    lives: 3,
-    speed: 1
-};
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            config.groundY = canvas.height - 100;
+            player.y = config.groundY - player.height;
+        }
 
-/* ================= PHASER SCENE ================= */
-class MainScene extends Phaser.Scene {
-    constructor() {
-        super('MainScene');
-    }
+        // ========== ЗАПУСК ИГРЫ ==========
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('controls').style.display = 'flex';
+            
+            // Сброс игры
+            player = { x: 100, y: config.groundY - 80, width: 50, height: 80, velY: 0, isJumping: false, isSliding: false };
+            obstacles = [];
+            dataItems = [];
+            score = 0;
+            distance = 0;
+            dataCollected = 0;
+            lives = 3;
+            gameSpeed = 1;
+            gameRunning = true;
+            
+            updateUI();
+            gameLoop();
+        }
 
-    preload() {
-        const g = this.make.graphics({ x: 0, y: 0, add: false });
+        // ========== ИГРОВОЙ ЦИКЛ ==========
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // Очистка экрана
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Рисуем фон
+            drawBackground();
+            
+            // Обновляем и рисуем игрока
+            updatePlayer();
+            drawPlayer();
+            
+            // Обновляем и рисуем препятствия
+            updateObstacles();
+            drawObstacles();
+            
+            // Обновляем и рисуем данные
+            updateData();
+            drawData();
+            
+            // Проверяем столкновения
+            checkCollisions();
+            
+            // Увеличиваем дистанцию
+            distance += gameSpeed;
+            if (distance % 1000 === 0) {
+                gameSpeed += 0.1;
+            }
+            
+            // Обновляем UI
+            updateUI();
+            
+            // Спавн объектов
+            spawnObjects();
+            
+            // Следующий кадр
+            animationId = requestAnimationFrame(gameLoop);
+        }
 
-        g.fillStyle(0x00ffea);
-        g.fillRect(0, 0, 40, 60);
-        g.generateTexture('player', 40, 60);
+        function drawBackground() {
+            // Дорога
+            ctx.fillStyle = '#333';
+            ctx.fillRect(0, config.groundY, canvas.width, 100);
+            
+            // Разделительная полоса
+            ctx.strokeStyle = '#ff0';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([20, 20]);
+            ctx.beginPath();
+            ctx.moveTo(0, config.groundY + 50);
+            ctx.lineTo(canvas.width, config.groundY + 50);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Здания на заднем плане
+            ctx.fillStyle = '#222';
+            for (let i = 0; i < 5; i++) {
+                const x = (i * 200 + (distance * 0.5)) % (canvas.width + 200) - 100;
+                const height = 100 + Math.sin(i) * 50;
+                ctx.fillRect(x, config.groundY - height, 80, height);
+                
+                // Окна
+                ctx.fillStyle = '#ff0';
+                for (let j = 0; j < 4; j++) {
+                    for (let k = 0; k < 3; k++) {
+                        if (Math.random() > 0.5) {
+                            ctx.fillRect(x + 10 + j * 20, config.groundY - height + 10 + k * 30, 10, 20);
+                        }
+                    }
+                }
+                ctx.fillStyle = '#222';
+            }
+            
+            // Неоновые вывески
+            ctx.fillStyle = '#f0f';
+            ctx.font = '20px Arial';
+            ctx.fillText('DATA', 300 + Math.sin(distance * 0.01) * 50, 100);
+            ctx.fillText('CYBER', 500 + Math.cos(distance * 0.01) * 50, 150);
+        }
 
-        g.clear();
-        g.fillStyle(0xff3366);
-        g.fillRect(0, 0, 50, 80);
-        g.generateTexture('obstacle', 50, 80);
+        function updatePlayer() {
+            // Гравитация
+            player.velY += config.gravity;
+            player.y += player.velY;
+            
+            // Ограничение на земле
+            if (player.y > config.groundY - (player.isSliding ? player.height/2 : player.height)) {
+                player.y = config.groundY - (player.isSliding ? player.height/2 : player.height);
+                player.velY = 0;
+                player.isJumping = false;
+            }
+            
+            // Слайд уменьшает высоту
+            if (player.isSliding) {
+                player.height = 40;
+            } else {
+                player.height = 80;
+            }
+        }
 
-        g.clear();
-        g.fillStyle(0x00ffea);
-        g.fillCircle(15, 15, 15);
-        g.generateTexture('data', 30, 30);
+        function drawPlayer() {
+            // Корпус
+            ctx.fillStyle = player.isSliding ? '#0af' : '#0ff';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Кабина
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(player.x + 15, player.y + 10, 20, 20);
+            
+            // Глаза
+            ctx.fillStyle = '#f0f';
+            ctx.fillRect(player.x + 20, player.y + 15, 5, 5);
+            ctx.fillRect(player.x + 35, player.y + 15, 5, 5);
+            
+            // Ноги
+            ctx.fillStyle = '#ff0';
+            ctx.fillRect(player.x + 10, player.y + player.height - 10, 10, 10);
+            ctx.fillRect(player.x + 30, player.y + player.height - 10, 10, 10);
+            
+            // Эффект скорости
+            if (gameSpeed > 1.5) {
+                ctx.fillStyle = `rgba(255, 100, 100, ${0.3 + Math.sin(Date.now() * 0.01) * 0.2})`;
+                ctx.fillRect(player.x - 20, player.y + 10, 20, player.height - 20);
+            }
+        }
 
-        g.destroy();
-    }
+        function spawnObjects() {
+            const now = Date.now();
+            
+            // Препятствия
+            if (now - lastObstacleTime > config.minGap + Math.random() * config.maxGap) {
+                obstacles.push({
+                    x: canvas.width,
+                    y: config.groundY - 60,
+                    width: 40,
+                    height: 60,
+                    type: Math.random() > 0.7 ? 'high' : 'low'
+                });
+                lastObstacleTime = now;
+            }
+            
+            // Данные
+            if (Math.random() < 0.02) {
+                dataItems.push({
+                    x: canvas.width,
+                    y: Math.random() * (config.groundY - 100) + 50,
+                    width: 20,
+                    height: 20,
+                    collected: false
+                });
+            }
+        }
 
-    create() {
-        this.physics.world.gravity.y = 900;
+        function updateObstacles() {
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].x -= config.obstacleSpeed * gameSpeed;
+                
+                if (obstacles[i].x < -50) {
+                    obstacles.splice(i, 1);
+                    score += 10;
+                }
+            }
+        }
 
-        this.ground = this.add.rectangle(180, 600, 360, 80, 0x003344);
-        this.physics.add.existing(this.ground, true);
+        function drawObstacles() {
+            obstacles.forEach(obs => {
+                // Барьер
+                ctx.fillStyle = '#f00';
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                
+                // Неоновый контур
+                ctx.strokeStyle = '#ff0';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(obs.x + 2, obs.y + 2, obs.width - 4, obs.height - 4);
+                
+                // Мигание
+                if (Math.sin(Date.now() * 0.005) > 0) {
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(obs.x + 15, obs.y + 10, 10, 10);
+                }
+            });
+        }
 
-        this.player = this.physics.add.sprite(80, 480, 'player');
-        this.player.setCollideWorldBounds(true);
+        function updateData() {
+            for (let i = dataItems.length - 1; i >= 0; i--) {
+                dataItems[i].x -= config.obstacleSpeed * gameSpeed * 0.7;
+                
+                if (dataItems[i].x < -50) {
+                    dataItems.splice(i, 1);
+                }
+            }
+        }
 
-        this.obstacles = this.physics.add.group();
-        this.dataItems = this.physics.add.group();
+        function drawData() {
+            dataItems.forEach(data => {
+                if (!data.collected) {
+                    // Жесткий диск
+                    ctx.fillStyle = '#0f0';
+                    ctx.beginPath();
+                    ctx.arc(data.x + 10, data.y + 10, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Центр
+                    ctx.fillStyle = '#000';
+                    ctx.beginPath();
+                    ctx.arc(data.x + 10, data.y + 10, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Свечение
+                    ctx.strokeStyle = '#0ff';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(data.x + 10, data.y + 10, 12, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    // Вращение
+                    ctx.strokeStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(data.x + 10, data.y + 10, 8, 
+                           Date.now() * 0.01, Date.now() * 0.01 + Math.PI * 0.5);
+                    ctx.stroke();
+                }
+            });
+        }
 
-        this.physics.add.collider(this.player, this.ground);
-        this.physics.add.overlap(this.player, this.obstacles, this.hitObstacle, null, this);
-        this.physics.add.overlap(this.player, this.dataItems, this.collectData, null, this);
+        function checkCollisions() {
+            // Проверка препятствий
+            obstacles.forEach(obs => {
+                if (player.x < obs.x + obs.width &&
+                    player.x + player.width > obs.x &&
+                    player.y < obs.y + obs.height &&
+                    player.y + player.height > obs.y) {
+                    
+                    lives--;
+                    obstacles.splice(obstacles.indexOf(obs), 1);
+                    
+                    if (lives <= 0) {
+                        gameOver();
+                    }
+                }
+            });
+            
+            // Проверка данных
+            dataItems.forEach((data, index) => {
+                if (!data.collected &&
+                    player.x < data.x + data.width &&
+                    player.x + player.width > data.x &&
+                    player.y < data.y + data.height &&
+                    player.y + player.height > data.y) {
+                    
+                    data.collected = true;
+                    dataCollected++;
+                    score += 50;
+                    
+                    // Шанс восстановить жизнь
+                    if (Math.random() > 0.9 && lives < 5) {
+                        lives++;
+                    }
+                    
+                    dataItems.splice(index, 1);
+                }
+            });
+        }
 
-        this.input.on('pointerdown', () => {
-            if (this.player.body.touching.down) {
-                this.player.setVelocityY(-420);
+        // ========== УПРАВЛЕНИЕ ==========
+        function jump() {
+            if (!player.isJumping && gameRunning) {
+                player.velY = config.jumpForce;
+                player.isJumping = true;
+                player.isSliding = false;
+            }
+        }
+
+        function stopJump() {
+            if (player.velY < -5) {
+                player.velY = -5;
+            }
+        }
+
+        function slide() {
+            if (!player.isJumping && gameRunning) {
+                player.isSliding = true;
+            }
+        }
+
+        function stopSlide() {
+            player.isSliding = false;
+        }
+
+        // ========== UI ==========
+        function updateUI() {
+            document.getElementById('distance').textContent = Math.floor(distance);
+            document.getElementById('data').textContent = dataCollected;
+            document.getElementById('speed').textContent = 'x' + gameSpeed.toFixed(1);
+            document.getElementById('lives').textContent = lives;
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            
+            // Проверяем рекорд
+            let isNewRecord = false;
+            if (distance > highScore) {
+                highScore = Math.floor(distance);
+                localStorage.setItem('cyberHighScore', highScore);
+                isNewRecord = true;
+            }
+            
+            // Показываем экран Game Over
+            document.getElementById('finalDistance').textContent = Math.floor(distance);
+            document.getElementById('finalData').textContent = dataCollected;
+            document.getElementById('newRecord').textContent = isNewRecord ? 
+                `🏆 НОВЫЙ РЕКОРД! ${highScore}m` : `Рекорд: ${highScore}m`;
+            document.getElementById('gameOver').style.display = 'flex';
+            document.getElementById('controls').style.display = 'none';
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            startGame();
+        }
+
+        // ========== Telegram интеграция ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const tg = window.Telegram?.WebApp;
+                if (tg) {
+                    tg.expand();
+                    tg.enableClosingConfirmation();
+                    
+                    // Показываем имя пользователя
+                    const user = tg.initDataUnsafe?.user;
+                    if (user) {
+                        document.getElementById('startScreen').innerHTML += 
+                            `<p style="color: #0ff; margin: 10px;">👋 Привет, ${user.first_name}!</p>`;
+                    }
+                }
+            } catch (e) {
+                console.log("Telegram не обнаружен, работает локально");
             }
         });
-
-        this.distanceText = this.add.text(10, 10, '0 m', { fontSize: '20px', fill: '#00ffea' });
-        this.livesText = this.add.text(10, 40, '❤️ 3', { fontSize: '20px', fill: '#ff3366' });
-
-        this.time.addEvent({
-            delay: 1200,
-            loop: true,
-            callback: () => this.spawnObstacle()
-        });
-
-        this.time.addEvent({
-            delay: 800,
-            loop: true,
-            callback: () => this.spawnData()
-        });
-    }
-
-    update() {
-        STATE.distance += STATE.speed;
-        this.distanceText.setText(STATE.distance + ' m');
-
-        this.obstacles.getChildren().forEach(o => {
-            o.x -= 4 * STATE.speed;
-            if (o.x < -50) o.destroy();
-        });
-
-        this.dataItems.getChildren().forEach(d => {
-            d.x -= 3 * STATE.speed;
-            if (d.x < -50) d.destroy();
-        });
-    }
-
-    spawnObstacle() {
-        const o = this.obstacles.create(400, 500, 'obstacle');
-        o.body.allowGravity = false;
-    }
-
-    spawnData() {
-        if (Math.random() > 0.7) {
-            const d = this.dataItems.create(400, Phaser.Math.Between(200, 450), 'data');
-            d.body.allowGravity = false;
-        }
-    }
-
-    hitObstacle() {
-        STATE.lives--;
-        this.livesText.setText('❤️ ' + STATE.lives);
-
-        if (STATE.lives <= 0) {
-            this.scene.restart();
-            STATE.lives = 3;
-            STATE.distance = 0;
-        }
-    }
-
-    collectData(player, data) {
-        data.destroy();
-        STATE.speed += 0.05;
-    }
-}
-
-/* ================= GAME CONFIG ================= */
-const gameConfig = {
-    type: Phaser.AUTO,
-    width: 360,
-    height: 640,
-    parent: 'gameContainer',
-    physics: {
-        default: 'arcade'
-    },
-    scene: MainScene,
-    scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
-    },
-    backgroundColor: '#0a0a1a'
-};
-
-let game = null;
-
-/* ================= START ================= */
-function startGame() {
-    document.getElementById('startScreen').style.display = 'none';
-
-    if (!game) {
-        game = new Phaser.Game(gameConfig);
-    } else {
-        game.scene.start('MainScene');
-    }
-}
-</script>
-
+    </script>
 </body>
 </html>
